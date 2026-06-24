@@ -7,6 +7,7 @@
 - 环境：`prod-d6g7im3ft632062b9`。
 - 数据库：微信云托管 MySQL，数据库名沿用 `flask_demo`。
 - 用户身份：仅信任云托管注入的 `X-WX-OPENID`。
+- 登录：手机号授权为注册凭证，昵称和头像可选；缺省时分配随机资料并允许后续修改。
 - 小程序请求：`wx.cloud.callContainer`，不依赖临时公网测试域名。
 - 签到：管理员操作，暂不允许用户自行远程签到。
 
@@ -30,6 +31,7 @@
 ## 上线前技术检查
 
 - 设置高强度 `SECRET_KEY` 与 `ADMIN_API_KEY`，不得提交到 Git。
+- 在云托管环境变量中配置 `WECHAT_APP_ID`、`WECHAT_APP_SECRET`，不得写入前端。
 - 后端部署成功后关闭 `SEED_SAMPLE_DATA`。
 - 将前端 `useMock` 改为 `false`。
 - 验证云托管 OpenID 请求头和手机号流程。

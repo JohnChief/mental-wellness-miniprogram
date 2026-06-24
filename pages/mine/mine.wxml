@@ -1,11 +1,66 @@
 <view class="page">
   <view class="page-title">我的</view>
 
-  <view class="profile-card card">
-    <view class="avatar">心</view>
+  <view wx:if="{{loadingProfile}}" class="profile-card card profile-loading">正在读取登录状态...</view>
+
+  <view wx:if="{{showGuest}}" class="profile-card card profile-clickable" bindtap="openLogin">
+    <view class="avatar">未</view>
     <view>
-      <view class="profile-name">{{nickname}}</view>
-      <view class="muted">报名时填写手机号即可完成身份记录</view>
+      <view class="profile-name">未登录</view>
+      <view class="muted">点击使用微信信息注册 / 登录</view>
+    </view>
+  </view>
+
+  <view wx:if="{{showLoginForm}}" class="login-card card">
+    <view class="login-title">{{formTitle}}</view>
+    <view class="muted login-tip">{{formTip}}</view>
+
+    <button class="avatar-button" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+      <image wx:if="{{showAvatarImage}}" class="chosen-avatar" src="{{avatarUrl}}" mode="aspectFill"></image>
+      <view wx:if="{{!showAvatarImage}}" class="avatar-placeholder">头像（选填）</view>
+    </button>
+
+    <input
+      class="nickname-input"
+      type="nickname"
+      maxlength="80"
+      placeholder="微信昵称（选填）"
+      value="{{nickname}}"
+      bindinput="onNicknameInput"
+    />
+
+    <view wx:if="{{showRegisterButton}}" class="agreement-row" bindtap="toggleAgreement">
+      <view class="{{checkboxClass}}">{{checkboxText}}</view>
+      <view class="agreement-text">
+        我已阅读并同意
+        <text class="privacy-link" catchtap="openPrivacy">《隐私政策》</text>
+        ，同意使用手机号以及可选的昵称、头像完成账号注册。
+      </view>
+    </view>
+
+    <button
+      wx:if="{{showRegisterButton}}"
+      class="primary-button login-button"
+      open-type="getPhoneNumber"
+      loading="{{submitting}}"
+      bindgetphonenumber="authorizePhone"
+    >授权手机号并登录</button>
+    <button
+      wx:if="{{showSaveButton}}"
+      class="primary-button login-button"
+      loading="{{submitting}}"
+      bindtap="saveProfile"
+    >保存资料</button>
+    <button class="cancel-login" bindtap="cancelLogin">暂不登录</button>
+  </view>
+
+  <view wx:if="{{showProfile}}" class="profile-card card profile-clickable" bindtap="editProfile">
+    <image wx:if="{{showAvatarImage}}" class="profile-avatar" src="{{user.avatar_url}}" mode="aspectFill"></image>
+    <view wx:if="{{showDefaultAvatar}}" class="{{defaultAvatarClass}}">{{defaultAvatarText}}</view>
+    <view wx:if="{{showFallbackAvatar}}" class="avatar">心</view>
+    <view>
+      <view class="profile-name">{{user.nickname}}</view>
+      <view class="muted">{{user.phone}}</view>
     </view>
   </view>
 
@@ -32,5 +87,5 @@
     <text data-type="disclaimer" bindtap="openAgreement">服务边界声明</text>
     <text data-type="delete" bindtap="openAgreement">注销说明</text>
   </view>
-  <button class="delete-account" bindtap="deleteAccount">注销账号并删除个人信息</button>
+  <button wx:if="{{showDeleteAccount}}" class="delete-account" bindtap="deleteAccount">注销账号并删除个人信息</button>
 </view>

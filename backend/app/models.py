@@ -15,6 +15,7 @@ class User(db.Model):
     id = db.Column(PRIMARY_KEY, primary_key=True, autoincrement=True)
     openid = db.Column(db.String(64), unique=True, nullable=False, index=True)
     nickname = db.Column(db.String(80), nullable=False, default="微信用户")
+    avatar_url = db.Column(db.String(500), nullable=False, default="")
     phone = db.Column(db.String(32))
     is_vip = db.Column(db.Boolean, nullable=False, default=False)
     privacy_version = db.Column(db.String(32))

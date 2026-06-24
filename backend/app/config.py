@@ -27,6 +27,8 @@ class Config:
 
     SECRET_KEY = os.getenv("SECRET_KEY", "")
     ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
+    WECHAT_APP_ID = os.getenv("WECHAT_APP_ID", "")
+    WECHAT_APP_SECRET = os.getenv("WECHAT_APP_SECRET", "")
     AUTO_INIT_DB = env_bool("AUTO_INIT_DB", True)
     SEED_SAMPLE_DATA = env_bool("SEED_SAMPLE_DATA", True)
     ALLOW_DEV_OPENID = env_bool("ALLOW_DEV_OPENID", False)

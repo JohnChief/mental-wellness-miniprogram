@@ -1,5 +1,6 @@
 import hmac
 import json
+import random
 import re
 from datetime import datetime
 from functools import wraps
@@ -10,9 +11,26 @@ from sqlalchemy.exc import IntegrityError
 from .extensions import db
 from .models import AdminAudit, Event, Registration, Setting, User
 from .serializers import event_to_dict, registration_to_dict
+from .wechat import WeChatApiError, resolve_phone_number
 
 api = Blueprint("api", __name__)
 PHONE_PATTERN = re.compile(r"^1\d{10}$")
+DEFAULT_NICKNAMES = [
+    "清风来客",
+    "云间小憩",
+    "自在行者",
+    "暖心朋友",
+    "松间听雨",
+    "星河旅人",
+]
+DEFAULT_AVATARS = [
+    "default:lotus",
+    "default:moon",
+    "default:cloud",
+    "default:leaf",
+    "default:star",
+    "default:mountain",
+]
 
 
 def ok(data=None, status=200):
@@ -30,6 +48,17 @@ def current_openid():
     return openid
 
 
+def user_to_dict(user):
+    return {
+        "id": user.id,
+        "nickname": user.nickname,
+        "avatar_url": user.avatar_url,
+        "phone": user.phone,
+        "is_vip": user.is_vip,
+        "registered": bool(user.phone and user.privacy_consent_at),
+    }
+
+
 def require_user(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
@@ -37,10 +66,8 @@ def require_user(view):
         if not openid:
             return error("未获取到可信微信身份，请通过小程序云托管调用", 401)
         user = User.query.filter_by(openid=openid, deleted_at=None).first()
-        if not user:
-            user = User(openid=openid)
-            db.session.add(user)
-            db.session.commit()
+        if not user or not user.phone or not user.privacy_consent_at:
+            return error("请先完成微信登录注册", 401)
         return view(user, *args, **kwargs)
 
     return wrapped
@@ -129,6 +156,78 @@ def event_detail(event_id):
     if not event:
         return error("活动不存在或已下架", 404)
     return ok(event_to_dict(event, include_detail=True))
+
+
+@api.get("/api/auth/me")
+def auth_me():
+    openid = current_openid()
+    if not openid:
+        return error("未获取到可信微信身份，请通过小程序云托管调用", 401)
+    user = User.query.filter_by(openid=openid, deleted_at=None).first()
+    if not user:
+        return ok({"registered": False})
+    return ok(user_to_dict(user))
+
+
+@api.post("/api/auth/register")
+def auth_register():
+    openid = current_openid()
+    if not openid:
+        return error("未获取到可信微信身份，请通过小程序云托管调用", 401)
+
+    payload = request.get_json(silent=True) or {}
+    nickname = str(payload.get("nickname", "")).strip()
+    avatar_url = str(payload.get("avatar_url", "")).strip()
+    phone_code = str(payload.get("phone_code", "")).strip()
+    privacy_version = str(payload.get("privacy_version", "")).strip()
+
+    if len(nickname) > 80:
+        return error("昵称不能超过80字")
+    if len(avatar_url) > 500:
+        return error("头像地址过长")
+    if not privacy_version:
+        return error("请先同意隐私政策")
+
+    try:
+        phone = resolve_phone_number(phone_code)
+    except WeChatApiError as exc:
+        return error(str(exc), 400)
+
+    user = User.query.filter_by(openid=openid, deleted_at=None).first()
+    if not user:
+        user = User(openid=openid)
+        db.session.add(user)
+
+    user.nickname = nickname or random.choice(DEFAULT_NICKNAMES)
+    user.avatar_url = avatar_url or random.choice(DEFAULT_AVATARS)
+    user.phone = phone
+    user.privacy_version = privacy_version
+    user.privacy_consent_at = datetime.now()
+    db.session.commit()
+    return ok(user_to_dict(user), 201)
+
+
+@api.put("/api/auth/profile")
+@require_user
+def update_profile(user):
+    payload = request.get_json(silent=True) or {}
+    nickname = str(payload.get("nickname", "")).strip()
+    avatar_url = str(payload.get("avatar_url", "")).strip()
+
+    if nickname:
+        if len(nickname) > 80:
+            return error("昵称不能超过80字")
+        user.nickname = nickname
+    if avatar_url:
+        if len(avatar_url) > 500:
+            return error("头像地址过长")
+        user.avatar_url = avatar_url
+
+    if not nickname and not avatar_url:
+        return error("没有需要更新的资料")
+
+    db.session.commit()
+    return ok(user_to_dict(user))
 
 
 @api.post("/api/registrations")
@@ -241,6 +340,7 @@ def delete_account(user):
         registration.remark = ""
     user.phone = None
     user.nickname = "已注销用户"
+    user.avatar_url = ""
     user.openid = f"deleted-{user.id}-{int(datetime.now().timestamp())}"
     user.deleted_at = datetime.now()
     db.session.commit()

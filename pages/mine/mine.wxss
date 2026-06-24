@@ -4,6 +4,22 @@
   padding: 36rpx 30rpx;
 }
 
+.profile-clickable {
+  position: relative;
+}
+
+.profile-clickable::after {
+  position: absolute;
+  right: 30rpx;
+  color: #aaa5bb;
+  content: "›";
+}
+
+.profile-loading {
+  color: #89869a;
+  font-size: 25rpx;
+}
+
 .avatar {
   display: flex;
   align-items: center;
@@ -19,10 +35,135 @@
   border-radius: 34rpx;
 }
 
+.profile-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  flex: none;
+  margin-right: 26rpx;
+  border-radius: 34rpx;
+}
+
+.default-avatar.lotus {
+  background: linear-gradient(135deg, #8b79ff, #c5b9ff);
+}
+
+.default-avatar.moon {
+  background: linear-gradient(135deg, #5969d8, #9ba8ff);
+}
+
+.default-avatar.cloud {
+  background: linear-gradient(135deg, #60a7d7, #a5d9ef);
+}
+
+.default-avatar.leaf {
+  background: linear-gradient(135deg, #62a982, #a7d9b8);
+}
+
+.default-avatar.star {
+  background: linear-gradient(135deg, #d69a55, #f0cd8d);
+}
+
+.default-avatar.mountain {
+  background: linear-gradient(135deg, #66767d, #9babad);
+}
+
 .profile-name {
   margin-bottom: 8rpx;
   font-size: 31rpx;
   font-weight: 700;
+}
+
+.login-card {
+  padding: 36rpx 30rpx;
+}
+
+.login-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.login-tip {
+  margin-top: 10rpx;
+  line-height: 1.6;
+}
+
+.avatar-button {
+  width: 132rpx;
+  height: 132rpx;
+  padding: 0;
+  margin: 32rpx auto 24rpx;
+  overflow: hidden;
+  background: #efecff;
+  border-radius: 40rpx;
+}
+
+.chosen-avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #6657d8;
+  font-size: 22rpx;
+}
+
+.nickname-input {
+  height: 84rpx;
+  padding: 0 24rpx;
+  background: #faf9fc;
+  border: 1rpx solid #ded9eb;
+  border-radius: 18rpx;
+}
+
+.agreement-row {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 26rpx;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36rpx;
+  height: 36rpx;
+  flex: none;
+  margin: 3rpx 14rpx 0 0;
+  color: #ffffff;
+  border: 2rpx solid #aaa5bb;
+  border-radius: 8rpx;
+}
+
+.checkbox.checked {
+  background: #6d5df6;
+  border-color: #6d5df6;
+}
+
+.agreement-text {
+  color: #777386;
+  font-size: 23rpx;
+  line-height: 1.6;
+}
+
+.privacy-link {
+  color: #6657f5;
+}
+
+.login-button {
+  margin-top: 30rpx;
+}
+
+.cancel-login {
+  margin-top: 14rpx;
+  color: #89869a;
+  font-size: 24rpx;
+  line-height: 64rpx;
+  background: transparent;
 }
 
 .function-grid {

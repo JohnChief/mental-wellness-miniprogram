@@ -18,6 +18,8 @@
 MYSQL_DATABASE=flask_demo
 SECRET_KEY=<长随机字符串>
 ADMIN_API_KEY=<另一条长随机字符串>
+WECHAT_APP_ID=<小程序 AppID>
+WECHAT_APP_SECRET=<小程序 AppSecret>
 AUTO_INIT_DB=true
 SEED_SAMPLE_DATA=true
 ALLOW_DEV_OPENID=false
@@ -42,6 +44,9 @@ GET /health
 ## 安全边界
 
 - 小程序用户接口不接受前端提交的 OpenID。
+- 首次登录只要求手机号授权；昵称和头像可选，未填写时系统随机分配，登录后可再次修改。
+- 手机号授权 code 由后端调用微信接口换取。
+- `WECHAT_APP_SECRET` 只能配置在云托管环境变量中，禁止写入代码或提交到 Git。
 - 管理接口要求 `X-ADMIN-KEY`，目前仅用于开发期联调。
 - 正式上线管理端前还需增加管理员账号、密码哈希、会话、CSRF、限速和更完整的操作审计。
 - 报名备注明确限制为非健康敏感信息。

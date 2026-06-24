@@ -5,12 +5,12 @@
 
     <view class="field">
       <view class="label">姓名</view>
-      <input class="input" maxlength="30" placeholder="请输入报名人姓名" bindinput="onNameInput" />
+      <input class="input" maxlength="30" placeholder="请输入报名人姓名" value="{{name}}" bindinput="onNameInput" />
     </view>
 
     <view class="field">
       <view class="label">手机号</view>
-      <input class="input" type="number" maxlength="11" placeholder="用于活动通知与确认" bindinput="onPhoneInput" />
+      <input class="input" type="number" maxlength="11" placeholder="用于活动通知与确认" value="{{phone}}" bindinput="onPhoneInput" />
     </view>
 
     <view class="field">

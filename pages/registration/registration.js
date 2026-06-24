@@ -15,6 +15,13 @@ Page({
   onLoad(options) {
     this.eventId = options.id
     api.getEvent(options.id).then(event => this.setData({ event }))
+    api.getCurrentUser().then(user => {
+      if (!user.registered) return
+      this.setData({
+        name: user.nickname || '',
+        phone: user.phone || ''
+      })
+    })
   },
 
   onNameInput(e) {

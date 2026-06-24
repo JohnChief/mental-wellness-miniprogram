@@ -22,6 +22,9 @@ def create_app(test_config=None):
     with app.app_context():
         if app.config["AUTO_INIT_DB"]:
             db.create_all()
+            from .migrations import ensure_runtime_schema
+
+            ensure_runtime_schema()
             if app.config["SEED_SAMPLE_DATA"]:
                 from .seed import seed_defaults
 

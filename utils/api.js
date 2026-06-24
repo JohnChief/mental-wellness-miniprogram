@@ -38,6 +38,60 @@ function getEvent(id) {
     : callContainer(`/api/events/${id}`)
 }
 
+function getCurrentUser() {
+  if (config.useMock) {
+    const user = wx.getStorageSync('mockUser')
+    return Promise.resolve(user || { registered: false })
+  }
+  return callContainer('/api/auth/me')
+}
+
+function uploadAvatar(filePath) {
+  if (config.useMock) return Promise.resolve(filePath)
+
+  const extension = (filePath.split('.').pop() || 'jpg').toLowerCase()
+  const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`
+  return wx.cloud.uploadFile({
+    cloudPath,
+    filePath,
+    config: {
+      env: config.envId
+    }
+  }).then(result => result.fileID)
+}
+
+function registerUser(payload) {
+  if (config.useMock) {
+    const defaultNicknames = ['清风来客', '云间小憩', '自在行者', '暖心朋友', '松间听雨', '星河旅人']
+    const defaultAvatars = ['default:lotus', 'default:moon', 'default:cloud', 'default:leaf', 'default:star', 'default:mountain']
+    const user = {
+      id: 1,
+      nickname: payload.nickname || defaultNicknames[Math.floor(Math.random() * defaultNicknames.length)],
+      avatar_url: payload.avatar_url || defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)],
+      phone: '13800138000',
+      is_vip: false,
+      registered: true
+    }
+    wx.setStorageSync('mockUser', user)
+    return Promise.resolve(user)
+  }
+  return callContainer('/api/auth/register', 'POST', payload)
+}
+
+function updateUserProfile(payload) {
+  if (config.useMock) {
+    const user = wx.getStorageSync('mockUser') || {}
+    const updated = {
+      ...user,
+      ...(payload.nickname ? { nickname: payload.nickname } : {}),
+      ...(payload.avatar_url ? { avatar_url: payload.avatar_url } : {})
+    }
+    wx.setStorageSync('mockUser', updated)
+    return Promise.resolve(updated)
+  }
+  return callContainer('/api/auth/profile', 'PUT', payload)
+}
+
 function createRegistration(payload) {
   if (config.useMock) {
     const records = wx.getStorageSync('mockRegistrations') || []
@@ -75,6 +129,7 @@ function cancelRegistration(id) {
 function deleteAccount() {
   if (config.useMock) {
     wx.removeStorageSync('mockRegistrations')
+    wx.removeStorageSync('mockUser')
     return Promise.resolve({ deleted: true })
   }
   return callContainer('/api/account', 'DELETE')
@@ -84,6 +139,10 @@ module.exports = {
   getHome,
   getEvents,
   getEvent,
+  getCurrentUser,
+  uploadAvatar,
+  registerUser,
+  updateUserProfile,
   createRegistration,
   getMyRegistrations,
   cancelRegistration,

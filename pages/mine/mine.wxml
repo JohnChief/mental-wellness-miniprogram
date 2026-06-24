@@ -1,0 +1,36 @@
+<view class="page">
+  <view class="page-title">我的</view>
+
+  <view class="profile-card card">
+    <view class="avatar">心</view>
+    <view>
+      <view class="profile-name">{{nickname}}</view>
+      <view class="muted">报名时填写手机号即可完成身份记录</view>
+    </view>
+  </view>
+
+  <view class="section-title">功能入口</view>
+  <view class="function-grid">
+    <view class="function-card card" bindtap="openRecords">我的报名</view>
+    <view class="function-card card" bindtap="openRecords">我的记录</view>
+    <view class="function-card card" bindtap="contact">联系客服</view>
+    <view class="function-card card" data-type="terms" bindtap="openAgreement">用户协议</view>
+  </view>
+
+  <view class="record-card card" bindtap="openRecords">
+    <view class="record-title">我的记录</view>
+    <view class="muted">显示报名记录与当前状态</view>
+  </view>
+
+  <view class="record-card card" bindtap="about">
+    <view class="record-title">关于我们</view>
+    <view class="muted">团队介绍与服务边界</view>
+  </view>
+
+  <view class="agreement-links">
+    <text data-type="privacy" bindtap="openAgreement">隐私政策</text>
+    <text data-type="disclaimer" bindtap="openAgreement">服务边界声明</text>
+    <text data-type="delete" bindtap="openAgreement">注销说明</text>
+  </view>
+  <button class="delete-account" bindtap="deleteAccount">注销账号并删除个人信息</button>
+</view>

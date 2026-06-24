@@ -1,0 +1,86 @@
+.form-card {
+  padding: 36rpx 30rpx;
+}
+
+.event-summary {
+  margin-bottom: 34rpx;
+  color: #4b4098;
+  font-size: 31rpx;
+  font-weight: 700;
+}
+
+.field {
+  margin-bottom: 28rpx;
+}
+
+.label {
+  margin-bottom: 12rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 22rpx;
+  background: #faf9fc;
+  border: 1rpx solid #ded9eb;
+  border-radius: 18rpx;
+}
+
+.input {
+  height: 82rpx;
+}
+
+.textarea {
+  height: 150rpx;
+}
+
+.agreement-row {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 10rpx;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36rpx;
+  height: 36rpx;
+  flex: none;
+  margin: 3rpx 14rpx 0 0;
+  color: #ffffff;
+  border: 2rpx solid #aaa5bb;
+  border-radius: 8rpx;
+}
+
+.checkbox.checked {
+  background: #6d5df6;
+  border-color: #6d5df6;
+}
+
+.agreement-text {
+  color: #777386;
+  font-size: 23rpx;
+  line-height: 1.6;
+}
+
+.link {
+  color: #6657f5;
+}
+
+.submit-button {
+  margin-top: 34rpx;
+}
+
+.success-hint {
+  margin-top: 26rpx;
+  padding: 34rpx 30rpx;
+}
+
+.hint-title {
+  margin-bottom: 10rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+}

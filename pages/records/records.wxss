@@ -1,0 +1,44 @@
+.record {
+  margin-bottom: 22rpx;
+  padding: 30rpx;
+}
+
+.record-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.record-name {
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.status {
+  padding: 8rpx 14rpx;
+  color: #5d4ee0;
+  font-size: 21rpx;
+  background: #efecff;
+  border-radius: 14rpx;
+}
+
+.status.cancelled {
+  color: #858291;
+  background: #f0eff3;
+}
+
+.record-person {
+  margin-top: 20rpx;
+  font-size: 24rpx;
+}
+
+.cancel-button {
+  width: 180rpx;
+  margin: 24rpx 0 0 auto;
+  color: #6f6b7b;
+  font-size: 23rpx;
+  line-height: 60rpx;
+  background: #f4f2f8;
+  border-radius: 16rpx;
+}

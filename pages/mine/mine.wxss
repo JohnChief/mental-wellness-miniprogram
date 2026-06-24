@@ -1,0 +1,72 @@
+.profile-card {
+  display: flex;
+  align-items: center;
+  padding: 36rpx 30rpx;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100rpx;
+  height: 100rpx;
+  flex: none;
+  margin-right: 26rpx;
+  color: #ffffff;
+  font-size: 38rpx;
+  font-weight: 700;
+  background: #7565f6;
+  border-radius: 34rpx;
+}
+
+.profile-name {
+  margin-bottom: 8rpx;
+  font-size: 31rpx;
+  font-weight: 700;
+}
+
+.function-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14rpx;
+}
+
+.function-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 138rpx;
+  padding: 12rpx;
+  font-size: 25rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
+.record-card {
+  min-height: 178rpx;
+  margin-top: 22rpx;
+  padding: 38rpx 30rpx;
+}
+
+.record-title {
+  margin-bottom: 10rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.agreement-links {
+  display: flex;
+  justify-content: center;
+  gap: 26rpx;
+  margin-top: 34rpx;
+  color: #777386;
+  font-size: 22rpx;
+}
+
+.delete-account {
+  margin-top: 28rpx;
+  color: #9995a6;
+  font-size: 22rpx;
+  line-height: 64rpx;
+  background: transparent;
+}

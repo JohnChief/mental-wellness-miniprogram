@@ -1,49 +1,54 @@
-// index.js
-const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
+const api = require('../../utils/api')
 
 Page({
   data: {
-    motto: 'Hello World',
-    userInfo: {
-      avatarUrl: defaultAvatarUrl,
-      nickName: '',
-    },
-    hasUserInfo: false,
-    canIUseGetUserProfile: wx.canIUse('getUserProfile'),
-    canIUseNicknameComp: wx.canIUse('input.type.nickname'),
+    loading: true,
+    error: '',
+    showContent: false,
+    settings: {},
+    featuredEvent: null,
+    events: []
   },
-  bindViewTap() {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
+
+  onLoad() {
+    this.loadHome()
   },
-  onChooseAvatar(e) {
-    const { avatarUrl } = e.detail
-    const { nickName } = this.data.userInfo
-    this.setData({
-      "userInfo.avatarUrl": avatarUrl,
-      hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
-    })
+
+  onPullDownRefresh() {
+    this.loadHome().finally(() => wx.stopPullDownRefresh())
   },
-  onInputChange(e) {
-    const nickName = e.detail.value
-    const { avatarUrl } = this.data.userInfo
-    this.setData({
-      "userInfo.nickName": nickName,
-      hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
-    })
-  },
-  getUserProfile(e) {
-    // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-    wx.getUserProfile({
-      desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-      success: (res) => {
-        console.log(res)
+
+  loadHome() {
+    this.setData({ loading: true, error: '', showContent: false })
+    return api.getHome()
+      .then(data => {
         this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
+          settings: data.settings,
+          featuredEvent: data.featured_event,
+          events: data.events,
+          loading: false,
+          showContent: true
         })
-      }
-    })
+      })
+      .catch(error => {
+        this.setData({ loading: false, error: error.message, showContent: false })
+      })
   },
+
+  openFeatured() {
+    const event = this.data.featuredEvent
+    if (event) wx.navigateTo({ url: `/pages/activityDetail/activityDetail?id=${event.id}` })
+  },
+
+  openEvent(e) {
+    wx.navigateTo({ url: `/pages/activityDetail/activityDetail?id=${e.currentTarget.dataset.id}` })
+  },
+
+  openActivities() {
+    wx.switchTab({ url: '/pages/activity/activity' })
+  },
+
+  openRegistration() {
+    wx.switchTab({ url: '/pages/activity/activity' })
+  }
 })

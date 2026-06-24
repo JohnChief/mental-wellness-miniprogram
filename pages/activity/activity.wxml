@@ -1,0 +1,38 @@
+<view class="page">
+  <view class="page-title">活动</view>
+  <view class="filter-label">筛选活动</view>
+  <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="filter-row">
+      <view
+        wx:for="{{filters}}"
+        wx:key="label"
+        class="{{item.className}}"
+        data-filter="{{item.label}}"
+        bindtap="selectFilter"
+      >{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="section-label">活动列表</view>
+  <view wx:if="{{loading}}" class="empty-state">正在加载...</view>
+  <view wx:if="{{error}}" class="error-state" bindtap="loadEvents">{{error}}，点击重试</view>
+  <view wx:if="{{showEmpty}}" class="empty-state">暂时没有符合条件的活动</view>
+  <view
+    wx:if="{{showList}}"
+    class="activity-card card"
+    wx:for="{{events}}"
+    wx:key="id"
+    data-id="{{item.id}}"
+    bindtap="openEvent"
+  >
+    <view class="activity-cover" style="background: {{item.cover_color}};"></view>
+    <view class="activity-info">
+      <view class="activity-title">{{item.title}}</view>
+      <view class="muted">
+        {{item.event_time_text}}
+        <text wx:if="{{item.showRemaining}}"> · 剩余{{item.remaining}}名</text>
+      </view>
+      <view class="activity-meta">{{item.location}} · {{item.price_text}}</view>
+    </view>
+  </view>
+</view>

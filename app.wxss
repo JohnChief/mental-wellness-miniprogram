@@ -1,10 +1,66 @@
 /**app.wxss**/
-.container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 200rpx 0;
+page {
+  min-height: 100%;
+  color: #222039;
+  background: #f7f6fb;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+view,
+text,
+button,
+input,
+textarea {
   box-sizing: border-box;
+}
+
+button::after {
+  border: none;
+}
+
+.page {
+  padding: 32rpx 28rpx 56rpx;
+}
+
+.page-title {
+  margin-bottom: 24rpx;
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.section-title {
+  margin: 30rpx 8rpx 16rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.card {
+  background: #ffffff;
+  border: 1rpx solid #e8e5f1;
+  border-radius: 30rpx;
+}
+
+.muted {
+  color: #89869a;
+  font-size: 24rpx;
+}
+
+.primary-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88rpx;
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1;
+  background: #6d5df6;
+  border-radius: 24rpx;
+}
+
+.empty-state,
+.error-state {
+  padding: 96rpx 30rpx;
+  color: #89869a;
+  text-align: center;
 }

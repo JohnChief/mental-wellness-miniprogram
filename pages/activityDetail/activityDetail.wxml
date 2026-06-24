@@ -1,0 +1,37 @@
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="empty-state">正在加载...</view>
+  <view wx:if="{{error}}" class="error-state" bindtap="loadEvent">{{error}}，点击重试</view>
+
+  <block wx:if="{{showContent}}">
+    <view class="detail-hero">
+      <view class="detail-title">{{event.title}}</view>
+      <view class="detail-subtitle">{{event.subtitle}}</view>
+      <view class="detail-meta">{{event.event_time_text}} · {{event.location}} · {{event.price_text}}</view>
+    </view>
+
+    <view class="detail-card card">
+      <view class="block-title">活动介绍</view>
+      <view class="block-text">{{event.description}}</view>
+      <view class="info-line">时间：{{event.event_time_text}}</view>
+      <view class="info-line">地点：{{event.location}}</view>
+      <view class="info-line" wx:if="{{event.showRemaining}}">剩余名额：{{event.remaining}}名</view>
+    </view>
+
+    <view class="detail-card card">
+      <view class="block-title">适合人群</view>
+      <view class="block-text">{{event.target_audience}}</view>
+      <view class="block-title sub">活动流程</view>
+      <view class="block-text">{{event.flow}}</view>
+    </view>
+
+    <view class="detail-card card notice-card">
+      <view class="block-title">注意事项与服务边界</view>
+      <view class="block-text">{{event.notice}}</view>
+    </view>
+
+    <view class="bottom-space"></view>
+    <view class="fixed-action">
+      <button class="primary-button" bindtap="register">立即报名</button>
+    </view>
+  </block>
+</view>

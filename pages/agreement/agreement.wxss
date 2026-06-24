@@ -1,0 +1,23 @@
+.agreement-card {
+  margin-bottom: 22rpx;
+  padding: 34rpx 30rpx;
+}
+
+.agreement-title {
+  margin-bottom: 14rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.agreement-body {
+  color: #666275;
+  font-size: 26rpx;
+  line-height: 1.85;
+}
+
+.version {
+  padding: 20rpx;
+  color: #9995a6;
+  font-size: 22rpx;
+  text-align: center;
+}

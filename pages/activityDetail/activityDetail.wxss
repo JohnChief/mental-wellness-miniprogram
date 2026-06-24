@@ -1,0 +1,70 @@
+.detail-page {
+  padding: 28rpx 28rpx 0;
+}
+
+.detail-hero {
+  min-height: 280rpx;
+  padding: 54rpx 30rpx;
+  color: #40358e;
+  background: linear-gradient(135deg, #eee9ff, #e7e0ff);
+  border: 1rpx solid #d8ceff;
+  border-radius: 32rpx;
+}
+
+.detail-title {
+  font-size: 38rpx;
+  font-weight: 700;
+}
+
+.detail-subtitle {
+  margin-top: 12rpx;
+  color: #77718d;
+}
+
+.detail-meta {
+  margin-top: 62rpx;
+  font-size: 23rpx;
+}
+
+.detail-card {
+  margin-top: 24rpx;
+  padding: 36rpx 30rpx;
+}
+
+.block-title {
+  margin-bottom: 12rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.block-title.sub {
+  margin-top: 30rpx;
+}
+
+.block-text,
+.info-line {
+  color: #656175;
+  font-size: 26rpx;
+  line-height: 1.75;
+}
+
+.info-line {
+  margin-top: 8rpx;
+}
+
+.notice-card {
+  margin-bottom: 20rpx;
+}
+
+.bottom-space {
+  height: 150rpx;
+}
+
+.fixed-action {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 20rpx 28rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+}

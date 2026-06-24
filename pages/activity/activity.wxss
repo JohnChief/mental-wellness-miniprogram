@@ -1,0 +1,68 @@
+.filter-label,
+.section-label {
+  margin: 0 8rpx 14rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.section-label {
+  margin-top: 12rpx;
+}
+
+.filter-scroll {
+  width: 100%;
+  margin-bottom: 14rpx;
+  white-space: nowrap;
+}
+
+.filter-row {
+  display: inline-flex;
+  gap: 16rpx;
+  padding-bottom: 8rpx;
+}
+
+.filter-chip {
+  min-width: 156rpx;
+  padding: 19rpx 28rpx;
+  text-align: center;
+  background: #ffffff;
+  border: 1rpx solid #e2deed;
+  border-radius: 24rpx;
+}
+
+.filter-chip.active {
+  color: #ffffff;
+  background: #6d5df6;
+  border-color: #6d5df6;
+}
+
+.activity-card {
+  display: flex;
+  align-items: center;
+  margin-bottom: 22rpx;
+  padding: 24rpx;
+}
+
+.activity-cover {
+  width: 138rpx;
+  height: 100rpx;
+  flex: none;
+  border-radius: 22rpx;
+}
+
+.activity-info {
+  min-width: 0;
+  margin-left: 24rpx;
+}
+
+.activity-title {
+  margin-bottom: 8rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.activity-meta {
+  margin-top: 8rpx;
+  color: #6657b8;
+  font-size: 22rpx;
+}

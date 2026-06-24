@@ -1,27 +1,47 @@
-<!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-    <view class="userinfo">
-      <block wx:if="{{canIUseNicknameComp && !hasUserInfo}}">
-        <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-          <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
-        </button>
-        <view class="nickname-wrapper">
-          <text class="nickname-label">昵称</text>
-          <input type="nickname" class="nickname-input" placeholder="请输入昵称" bind:change="onInputChange" />
-        </view>
-      </block>
-      <block wx:elif="{{!hasUserInfo}}">
-        <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile"> 获取头像昵称 </button>
-        <view wx:else> 请使用2.10.4及以上版本基础库 </view>
-      </block>
-      <block wx:else>
-        <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-        <text class="userinfo-nickname">{{userInfo.nickName}}</text>
-      </block>
+<view class="page">
+  <view class="page-title">首页</view>
+
+  <view wx:if="{{loading}}" class="empty-state">正在加载...</view>
+  <view wx:if="{{error}}" class="error-state" bindtap="loadHome">{{error}}，点击重试</view>
+
+  <block wx:if="{{showContent}}">
+    <view class="brand-card card">
+      <view class="brand-mark">心</view>
+      <view>
+        <view class="brand-name">{{settings.platform_name}}</view>
+        <view class="muted">{{settings.platform_slogan}}</view>
+      </view>
     </view>
-    <view class="usermotto">
-      <text class="user-motto">{{motto}}</text>
+
+    <view class="hero-card" bindtap="openFeatured">
+      <view class="hero-title">{{featuredEvent.title}}</view>
+      <view class="hero-subtitle">{{featuredEvent.subtitle}}</view>
+      <view class="hero-action">查看活动详情 →</view>
     </view>
-  </view>
-</scroll-view>
+
+    <view class="section-title">核心服务</view>
+    <view class="service-grid">
+      <view class="service-card card" wx:for="{{settings.service_cards}}" wx:key="*this">
+        {{item}}
+      </view>
+    </view>
+
+    <view class="consult-card card" bindtap="openRegistration">
+      <view class="consult-title">立即咨询 / 加入社群</view>
+      <view class="muted">选择活动并提交报名信息</view>
+    </view>
+
+    <view class="section-title">主推活动</view>
+    <view class="event-card card" wx:for="{{events}}" wx:key="id" data-id="{{item.id}}" bindtap="openEvent">
+      <view class="event-cover" style="background: {{item.cover_color}};"></view>
+      <view class="event-content">
+        <view class="event-title">{{item.title}}</view>
+        <view class="muted">{{item.event_time_text}} · {{item.price_text}}</view>
+      </view>
+    </view>
+
+    <view class="compliance-note">
+      平台提供一般性情绪支持与活动体验，不替代专业医疗诊断、治疗或心理咨询。
+    </view>
+  </block>
+</view>

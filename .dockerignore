@@ -1,0 +1,13 @@
+.git
+.agents
+.codex
+backend/.env
+backend/.test-deps
+backend/instance
+__pycache__
+*.pyc
+.pytest_cache
+tests
+docs
+feishu_bot
+pages

@@ -5,8 +5,20 @@
 {% block content %}
 <form class="filter-bar" method="get">
   <input name="keyword" value="{{ keyword }}" placeholder="搜索昵称或手机号">
-  <button class="button secondary" type="submit">搜索</button>
-  {% if keyword %}<a class="text-action" href="{{ url_for('admin.users') }}">清除</a>{% endif %}
+  <select name="vip">
+    <option value="">全部身份</option>
+    <option value="yes" {{ 'selected' if vip == 'yes' }}>仅 VIP</option>
+    <option value="no" {{ 'selected' if vip == 'no' }}>仅普通用户</option>
+  </select>
+  <select name="sort">
+    <option value="newest" {{ 'selected' if sort == 'newest' }}>注册时间：最新</option>
+    <option value="oldest" {{ 'selected' if sort == 'oldest' }}>注册时间：最早</option>
+    <option value="nickname_asc" {{ 'selected' if sort == 'nickname_asc' }}>昵称：A → Z</option>
+    <option value="nickname_desc" {{ 'selected' if sort == 'nickname_desc' }}>昵称：Z → A</option>
+    <option value="vip_first" {{ 'selected' if sort == 'vip_first' }}>VIP 优先</option>
+  </select>
+  <button class="button secondary" type="submit">应用</button>
+  {% if keyword or vip or sort != 'newest' %}<a class="text-action" href="{{ url_for('admin.users') }}">清除</a>{% endif %}
 </form>
 <section class="panel">
   <div class="panel-heading compact"><p>共找到 {{ users|length }} 位用户</p></div>

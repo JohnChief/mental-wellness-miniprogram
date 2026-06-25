@@ -316,13 +316,33 @@ def registration_checkin(registration_id):
 @admin_required
 def users():
     keyword = (request.args.get("keyword") or "").strip()
+    sort = request.args.get("sort", "newest")
+    vip = request.args.get("vip", "")
     query = User.query.filter_by(deleted_at=None)
     if keyword:
         query = query.filter(
             or_(User.nickname.contains(keyword), User.phone.contains(keyword))
         )
-    items = query.order_by(User.created_at.desc()).all()
-    return render_template("admin/users.html", users=items, keyword=keyword)
+    if vip in {"yes", "no"}:
+        query = query.filter_by(is_vip=vip == "yes")
+
+    order_options = {
+        "newest": (User.created_at.desc(),),
+        "oldest": (User.created_at.asc(),),
+        "nickname_asc": (User.nickname.asc(), User.created_at.desc()),
+        "nickname_desc": (User.nickname.desc(), User.created_at.desc()),
+        "vip_first": (User.is_vip.desc(), User.created_at.desc()),
+    }
+    if sort not in order_options:
+        sort = "newest"
+    items = query.order_by(*order_options[sort]).all()
+    return render_template(
+        "admin/users.html",
+        users=items,
+        keyword=keyword,
+        sort=sort,
+        vip=vip,
+    )
 
 
 @admin.post("/users/<int:user_id>/vip")

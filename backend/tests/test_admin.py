@@ -127,6 +127,43 @@ class AdminTestCase(unittest.TestCase):
         with self.app.app_context():
             self.assertTrue(db.session.get(User, user_id).is_vip)
 
+    def test_admin_users_support_search_filter_and_sort(self):
+        self.login()
+        with self.app.app_context():
+            db.session.add_all(
+                [
+                    User(
+                        openid="user-alpha",
+                        nickname="Alpha",
+                        phone="13800138001",
+                        is_vip=False,
+                    ),
+                    User(
+                        openid="user-beta",
+                        nickname="Beta",
+                        phone="13800138002",
+                        is_vip=True,
+                    ),
+                ]
+            )
+            db.session.commit()
+
+        searched = self.client.get("/admin/users?keyword=13800138002")
+        self.assertEqual(searched.status_code, 200)
+        self.assertIn(b"Beta", searched.data)
+        self.assertNotIn(b"Alpha", searched.data)
+
+        vip_only = self.client.get("/admin/users?vip=yes&sort=vip_first")
+        self.assertEqual(vip_only.status_code, 200)
+        self.assertIn(b"Beta", vip_only.data)
+        self.assertNotIn(b"Alpha", vip_only.data)
+
+        sorted_users = self.client.get("/admin/users?sort=nickname_desc")
+        self.assertLess(
+            sorted_users.data.find(b"Beta"),
+            sorted_users.data.find(b"Alpha"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

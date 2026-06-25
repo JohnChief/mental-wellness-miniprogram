@@ -55,7 +55,7 @@ def user_to_dict(user):
         "avatar_url": user.avatar_url,
         "phone": user.phone,
         "is_vip": user.is_vip,
-        "registered": bool(user.phone and user.privacy_consent_at),
+        "registered": bool(user.privacy_consent_at),
     }
 
 
@@ -66,7 +66,7 @@ def require_user(view):
         if not openid:
             return error("未获取到可信微信身份，请通过小程序云托管调用", 401)
         user = User.query.filter_by(openid=openid, deleted_at=None).first()
-        if not user or not user.phone or not user.privacy_consent_at:
+        if not user or not user.privacy_consent_at:
             return error("请先完成微信登录注册", 401)
         return view(user, *args, **kwargs)
 
@@ -188,10 +188,12 @@ def auth_register():
     if not privacy_version:
         return error("请先同意隐私政策")
 
-    try:
-        phone = resolve_phone_number(phone_code)
-    except WeChatApiError as exc:
-        return error(str(exc), 400)
+    phone = None
+    if phone_code:
+        try:
+            phone = resolve_phone_number(phone_code)
+        except WeChatApiError as exc:
+            return error(str(exc), 400)
 
     user = User.query.filter_by(openid=openid, deleted_at=None).first()
     if not user:
@@ -200,7 +202,8 @@ def auth_register():
 
     user.nickname = nickname or random.choice(DEFAULT_NICKNAMES)
     user.avatar_url = avatar_url or random.choice(DEFAULT_AVATARS)
-    user.phone = phone
+    if phone:
+        user.phone = phone
     user.privacy_version = privacy_version
     user.privacy_consent_at = datetime.now()
     db.session.commit()

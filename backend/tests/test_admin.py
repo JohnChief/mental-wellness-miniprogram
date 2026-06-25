@@ -164,6 +164,31 @@ class AdminTestCase(unittest.TestCase):
             sorted_users.data.find(b"Alpha"),
         )
 
+    def test_admin_can_bulk_set_users_as_vip(self):
+        self.login()
+        with self.app.app_context():
+            users = [
+                User(openid="bulk-user-1", nickname="Bulk One"),
+                User(openid="bulk-user-2", nickname="Bulk Two"),
+            ]
+            db.session.add_all(users)
+            db.session.commit()
+            user_ids = [user.id for user in users]
+        with self.client.session_transaction() as session:
+            csrf = session["csrf_token"]
+
+        response = self.client.post(
+            "/admin/users/bulk-vip",
+            data={"csrf_token": csrf, "user_ids": user_ids},
+        )
+        self.assertEqual(response.status_code, 302)
+        with self.app.app_context():
+            updated = User.query.filter(User.id.in_(user_ids)).all()
+            self.assertTrue(all(user.is_vip for user in updated))
+            self.assertEqual(
+                AdminAudit.query.filter_by(action="bulk_set_vip").count(), 2
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

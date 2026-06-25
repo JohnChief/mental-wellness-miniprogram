@@ -355,3 +355,34 @@ def user_toggle_vip(user_id):
     db.session.commit()
     flash(f"已{'设为' if user.is_vip else '取消'} VIP", "success")
     return redirect(request.referrer or url_for("admin.users"))
+
+
+@admin.post("/users/bulk-vip")
+@admin_required
+def users_bulk_vip():
+    verify_csrf()
+    user_ids = []
+    for value in request.form.getlist("user_ids"):
+        try:
+            user_ids.append(int(value))
+        except (TypeError, ValueError):
+            continue
+    user_ids = list(dict.fromkeys(user_ids))
+    if not user_ids:
+        flash("请至少选择一位用户", "error")
+        return redirect(request.referrer or url_for("admin.users"))
+
+    users = User.query.filter(
+        User.id.in_(user_ids),
+        User.deleted_at.is_(None),
+    ).all()
+    changed = 0
+    for user in users:
+        if user.is_vip:
+            continue
+        user.is_vip = True
+        changed += 1
+        record_audit("bulk_set_vip", "user", user.id, "True")
+    db.session.commit()
+    flash(f"已将 {changed} 位用户设为 VIP", "success")
+    return redirect(request.referrer or url_for("admin.users"))

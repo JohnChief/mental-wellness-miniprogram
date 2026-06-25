@@ -72,6 +72,8 @@ tbody tr:last-child td { border-bottom: 0; }
 tbody tr:hover { background: #fdfcff; }
 .actions { text-align: right; }
 td.actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.select-cell { width: 44px; text-align: center; }
+.select-cell input { width: 16px; min-height: auto; margin: 0; accent-color: var(--primary); }
 .text-action { padding: 0; border: 0; color: var(--primary); background: transparent; font-size: 12px; }
 .text-action.danger { color: var(--danger); }
 .badge { display: inline-block; padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600; }

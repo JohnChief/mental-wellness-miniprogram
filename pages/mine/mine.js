@@ -152,10 +152,14 @@ Page({
 
     const phoneCode = e.detail.code || ''
     const errMsg = e.detail.errMsg || ''
-    if (!phoneCode && errMsg.indexOf(':ok') === -1) {
+    if (!phoneCode) {
       const config = require('../../config')
       if (!config.useMock) {
-        return wx.showToast({ title: '需要授权手机号才能登录', icon: 'none' })
+        const message = errMsg.indexOf('deny') !== -1
+          ? '你取消了手机号授权'
+          : '手机号授权失败，请重试'
+        console.error('getPhoneNumber failed:', e.detail)
+        return wx.showToast({ title: message, icon: 'none' })
       }
     }
 

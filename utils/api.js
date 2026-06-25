@@ -47,6 +47,7 @@ function getCurrentUser() {
 }
 
 function uploadAvatar(filePath) {
+  if (!filePath) return Promise.resolve('')
   if (config.useMock) return Promise.resolve(filePath)
 
   const extension = (filePath.split('.').pop() || 'jpg').toLowerCase()

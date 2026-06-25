@@ -4,7 +4,8 @@
 
 ## 云托管部署
 
-在 `flask-ytaf` 服务中创建新版本，代码目录选择本仓库的 `backend` 目录，容器端口为 `80`。
+在 `flask-ytaf` 服务中创建新版本，选择本仓库和目标分支，容器端口为 `80`。
+仓库根目录的 `Dockerfile` 会构建 `backend` 服务。
 
 保留模板已经配置的：
 
@@ -16,14 +17,30 @@
 
 ```text
 MYSQL_DATABASE=flask_demo
+# 本地开发也可使用 DATABASE_URL=sqlite:///local.db
 SECRET_KEY=<长随机字符串>
 ADMIN_API_KEY=<另一条长随机字符串>
+ADMIN_USERNAME=<管理后台账号>
+ADMIN_PASSWORD_HASH=<Werkzeug 生成的密码哈希>
 WECHAT_APP_ID=<小程序 AppID>
 WECHAT_APP_SECRET=<小程序 AppSecret>
 AUTO_INIT_DB=true
 SEED_SAMPLE_DATA=true
 ALLOW_DEV_OPENID=false
+SESSION_COOKIE_SECURE=true
+ADMIN_TEST_TOOLS_ENABLED=false
 ```
+
+部署后访问 `/admin/login` 进入运营管理后台。后台包含数据概览、活动管理、
+报名签到与用户 VIP 管理。开发环境可临时使用 `ADMIN_PASSWORD` 明文密码，
+正式环境应只配置 `ADMIN_PASSWORD_HASH`，可通过以下命令生成：
+
+```bash
+python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('替换为强密码'))"
+```
+
+测试阶段可将 `ADMIN_TEST_TOOLS_ENABLED` 设为 `true`，Admin 将显示测试数据生成、
+取消报名和恢复报名功能。正式运营前必须改回 `false`。
 
 首次启动会自动建表并写入三条演示活动。确认业务数据已由管理流程维护后，将 `SEED_SAMPLE_DATA` 改为 `false`。
 
@@ -44,9 +61,11 @@ GET /health
 ## 安全边界
 
 - 小程序用户接口不接受前端提交的 OpenID。
-- 首次登录只要求手机号授权；昵称和头像可选，未填写时系统随机分配，登录后可再次修改。
-- 手机号授权 code 由后端调用微信接口换取。
+- MVP 首次登录使用云托管注入的微信 OpenID；昵称和头像可选，手机号在活动报名时由用户填写。
+- 后端保留手机号授权 code 的兼容处理，待账号具备该能力后可恢复快捷授权。
 - `WECHAT_APP_SECRET` 只能配置在云托管环境变量中，禁止写入代码或提交到 Git。
 - 管理接口要求 `X-ADMIN-KEY`，目前仅用于开发期联调。
-- 正式上线管理端前还需增加管理员账号、密码哈希、会话、CSRF、限速和更完整的操作审计。
+- Admin 页面已使用服务端 Session、CSRF、安全 Cookie 配置与关键操作审计。
+- 正式运营前应改用 `ADMIN_PASSWORD_HASH`，增加登录限速，并关闭 `ADMIN_TEST_TOOLS_ENABLED`。
+- 当前为单管理员环境变量方案；多管理员、角色权限与操作者审计留待后续。
 - 报名备注明确限制为非健康敏感信息。

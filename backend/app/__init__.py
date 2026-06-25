@@ -16,8 +16,10 @@ def create_app(test_config=None):
     db.init_app(app)
 
     from .routes import api
+    from .admin import admin
 
     app.register_blueprint(api)
+    app.register_blueprint(admin)
 
     with app.app_context():
         if app.config["AUTO_INIT_DB"]:

@@ -34,17 +34,16 @@
       <view class="agreement-text">
         我已阅读并同意
         <text class="privacy-link" catchtap="openPrivacy">《隐私政策》</text>
-        ，同意使用手机号以及可选的昵称、头像完成账号注册。
+        ，同意使用微信身份以及可选的昵称、头像完成账号注册。
       </view>
     </view>
 
     <button
       wx:if="{{showRegisterButton}}"
       class="primary-button login-button"
-      open-type="getPhoneNumber"
       loading="{{submitting}}"
-      bindgetphonenumber="authorizePhone"
-    >授权手机号并登录</button>
+      bindtap="login"
+    >微信登录</button>
     <button
       wx:if="{{showSaveButton}}"
       class="primary-button login-button"

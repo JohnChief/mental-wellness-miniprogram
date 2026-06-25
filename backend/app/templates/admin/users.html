@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+{% block title %}用户管理{% endblock %}
+{% block heading %}用户管理{% endblock %}
+{% block subheading %}查看已注册用户并维护 VIP 身份。{% endblock %}
+{% block header_actions %}
+  {% if admin_test_tools_enabled %}
+    <form method="post" action="{{ url_for('admin.create_test_data') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="button secondary" type="submit">生成测试数据</button>
+    </form>
+  {% endif %}
+{% endblock %}
+{% block content %}
+<form class="filter-bar" method="get">
+  <input name="keyword" value="{{ keyword }}" placeholder="搜索昵称或手机号">
+  <select name="vip">
+    <option value="">全部身份</option>
+    <option value="yes" {{ 'selected' if vip == 'yes' }}>仅 VIP</option>
+    <option value="no" {{ 'selected' if vip == 'no' }}>仅普通用户</option>
+  </select>
+  <select name="sort">
+    <option value="newest" {{ 'selected' if sort == 'newest' }}>注册时间：最新</option>
+    <option value="oldest" {{ 'selected' if sort == 'oldest' }}>注册时间：最早</option>
+    <option value="nickname_asc" {{ 'selected' if sort == 'nickname_asc' }}>昵称：A → Z</option>
+    <option value="nickname_desc" {{ 'selected' if sort == 'nickname_desc' }}>昵称：Z → A</option>
+    <option value="vip_first" {{ 'selected' if sort == 'vip_first' }}>VIP 优先</option>
+  </select>
+  <button class="button secondary" type="submit">应用</button>
+  {% if keyword or vip or sort != 'newest' %}<a class="text-action" href="{{ url_for('admin.users') }}">清除</a>{% endif %}
+</form>
+<section class="panel">
+  <form method="post" action="{{ url_for('admin.users_bulk_vip') }}" id="bulk-vip-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="panel-heading compact">
+      <p>共找到 {{ users|length }} 位用户</p>
+      <button class="button tiny" type="submit">批量设为 VIP</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+      <thead><tr><th class="select-cell"><input type="checkbox" aria-label="全选用户" data-select-all></th><th>用户</th><th>手机号</th><th>身份</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+      {% for user in users %}
+        <tr>
+          <td class="select-cell"><input type="checkbox" name="user_ids" value="{{ user.id }}" aria-label="选择 {{ user.nickname }}" data-user-select></td>
+          <td><div class="user-cell"><span class="avatar">{{ (user.nickname or '用')[0] }}</span><strong>{{ user.nickname }}</strong></div></td>
+          <td>{{ user.phone or '—' }}</td>
+          <td>{% if user.is_vip %}<span class="badge vip">VIP 用户</span>{% else %}<span class="muted">普通用户</span>{% endif %}</td>
+          <td class="actions">
+            <button class="text-action" type="submit" formaction="{{ url_for('admin.user_toggle_vip', user_id=user.id) }}" name="csrf_token" value="{{ csrf_token }}">{{ '取消 VIP' if user.is_vip else '设为 VIP' }}</button>
+          </td>
+        </tr>
+      {% else %}<tr><td colspan="5" class="empty">没有符合条件的用户</td></tr>{% endfor %}
+      </tbody>
+      </table>
+    </div>
+  </form>
+</section>
+<script>
+  const selectAll = document.querySelector('[data-select-all]')
+  const userSelections = Array.from(document.querySelectorAll('[data-user-select]'))
+  if (selectAll) {
+    selectAll.addEventListener('change', () => {
+      userSelections.forEach(item => { item.checked = selectAll.checked })
+    })
+    userSelections.forEach(item => item.addEventListener('change', () => {
+      selectAll.checked = userSelections.length > 0 && userSelections.every(selection => selection.checked)
+      selectAll.indeterminate = userSelections.some(selection => selection.checked) && !selectAll.checked
+    }))
+  }
+</script>
+{% endblock %}

@@ -47,6 +47,7 @@ function getCurrentUser() {
 }
 
 function uploadAvatar(filePath) {
+  if (!filePath) return Promise.resolve('')
   if (config.useMock) return Promise.resolve(filePath)
 
   const extension = (filePath.split('.').pop() || 'jpg').toLowerCase()
@@ -68,7 +69,7 @@ function registerUser(payload) {
       id: 1,
       nickname: payload.nickname || defaultNicknames[Math.floor(Math.random() * defaultNicknames.length)],
       avatar_url: payload.avatar_url || defaultAvatars[Math.floor(Math.random() * defaultAvatars.length)],
-      phone: '13800138000',
+      phone: '',
       is_vip: false,
       registered: true
     }

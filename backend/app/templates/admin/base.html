@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}管理后台{% endblock %} · 心语轻疗愈</title>
+  <link rel="stylesheet" href="{{ url_for('admin.static', filename='admin.css') }}">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('admin.dashboard') }}">
+        <span class="brand-mark">心</span>
+        <span><strong>心语轻疗愈</strong><small>运营管理后台</small></span>
+      </a>
+      <nav>
+        <a class="{{ 'active' if request.endpoint == 'admin.dashboard' }}" href="{{ url_for('admin.dashboard') }}"><span>⌂</span> 数据概览</a>
+        <a class="{{ 'active' if request.endpoint in ['admin.events', 'admin.event_create', 'admin.event_edit'] }}" href="{{ url_for('admin.events') }}"><span>◇</span> 活动管理</a>
+        <a class="{{ 'active' if request.endpoint == 'admin.registrations' }}" href="{{ url_for('admin.registrations') }}"><span>✓</span> 报名管理</a>
+        <a class="{{ 'active' if request.endpoint == 'admin.users' }}" href="{{ url_for('admin.users') }}"><span>○</span> 用户管理</a>
+      </nav>
+      <div class="sidebar-footer">
+        <span>{{ current_admin }}</span>
+        <form method="post" action="{{ url_for('admin.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="link-button" type="submit">退出登录</button>
+        </form>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <button class="menu-button" type="button" aria-label="切换菜单" onclick="document.body.classList.toggle('menu-open')">☰</button>
+        <div>
+          <h1>{% block heading %}管理后台{% endblock %}</h1>
+          <p>{% block subheading %}{% endblock %}</p>
+        </div>
+        {% block header_actions %}{% endblock %}
+      </header>
+      <section class="content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast-stack" aria-live="polite" aria-atomic="true">
+              {% for category, message in messages %}
+                <div class="toast {{ category }}" data-toast>
+                  <span class="toast-icon">{{ '✓' if category == 'success' else '!' }}</span>
+                  <span>{{ message }}</span>
+                  <button type="button" aria-label="关闭提示" data-toast-close>×</button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+  <script>
+    document.querySelectorAll('[data-toast]').forEach((toast, index) => {
+      const close = () => {
+        toast.classList.add('leaving')
+        window.setTimeout(() => toast.remove(), 180)
+      }
+      const closeButton = toast.querySelector('[data-toast-close]')
+      if (closeButton) closeButton.addEventListener('click', close)
+      window.setTimeout(close, (toast.classList.contains('error') ? 6000 : 3000) + index * 250)
+    })
+  </script>
+</body>
+</html>

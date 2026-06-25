@@ -26,17 +26,15 @@ class ApiTestCase(unittest.TestCase):
             db.drop_all()
 
     def register_user(self, openid="test-openid"):
-        with patch("app.routes.resolve_phone_number", return_value="13800138000"):
-            return self.client.post(
-                "/api/auth/register",
-                json={
-                    "nickname": "微信测试用户",
-                    "avatar_url": "cloud://test-env/avatars/test.jpg",
-                    "phone_code": "test-phone-code",
-                    "privacy_version": "2026-06-24",
-                },
-                headers={"X-DEV-OPENID": openid},
-            )
+        return self.client.post(
+            "/api/auth/register",
+            json={
+                "nickname": "微信测试用户",
+                "avatar_url": "cloud://test-env/avatars/test.jpg",
+                "privacy_version": "2026-06-24",
+            },
+            headers={"X-DEV-OPENID": openid},
+        )
 
     def test_auth_registration_and_existing_login(self):
         guest = self.client.get("/api/auth/me", headers=self.headers)
@@ -46,7 +44,7 @@ class ApiTestCase(unittest.TestCase):
         registered = self.register_user()
         self.assertEqual(registered.status_code, 201)
         self.assertTrue(registered.json["data"]["registered"])
-        self.assertEqual(registered.json["data"]["phone"], "13800138000")
+        self.assertIsNone(registered.json["data"]["phone"])
 
         existing = self.client.get("/api/auth/me", headers=self.headers)
         self.assertEqual(existing.status_code, 200)
@@ -57,15 +55,11 @@ class ApiTestCase(unittest.TestCase):
         )
 
     def test_auth_can_use_generated_profile_and_update_later(self):
-        with patch("app.routes.resolve_phone_number", return_value="13800138000"):
-            registered = self.client.post(
-                "/api/auth/register",
-                json={
-                    "phone_code": "test-phone-code",
-                    "privacy_version": "2026-06-24",
-                },
-                headers=self.headers,
-            )
+        registered = self.client.post(
+            "/api/auth/register",
+            json={"privacy_version": "2026-06-24"},
+            headers=self.headers,
+        )
         self.assertEqual(registered.status_code, 201)
         self.assertTrue(registered.json["data"]["nickname"])
         self.assertTrue(

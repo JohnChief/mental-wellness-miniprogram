@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% block title %}活动管理{% endblock %}
+{% block heading %}活动管理{% endblock %}
+{% block subheading %}创建、编辑并控制小程序中的活动展示。{% endblock %}
+{% block header_actions %}<a class="button primary" href="{{ url_for('admin.event_create') }}">＋ 新建活动</a>{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <div class="tabs">
+    <a class="{{ 'active' if not status }}" href="{{ url_for('admin.events') }}">全部</a>
+    <a class="{{ 'active' if status == 'online' }}" href="{{ url_for('admin.events', status='online') }}">已上架</a>
+    <a class="{{ 'active' if status == 'offline' }}" href="{{ url_for('admin.events', status='offline') }}">未上架</a>
+  </div>
+  <span class="result-count">共 {{ events|length }} 个活动</span>
+</div>
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>活动</th><th>时间 / 地点</th><th>名额</th><th>状态</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+      {% for event in events %}
+        <tr>
+          <td><div class="event-cell"><span class="cover-dot" style="background:{{ event.cover_color }}"></span><span><strong>{{ event.title }}</strong><small>{{ event.category }} · {{ event.price_text }}</small></span></div></td>
+          <td><strong>{{ event.event_time.strftime('%Y-%m-%d %H:%M') }}</strong><small>{{ event.location }}</small></td>
+          <td>{{ event.capacity or '不限' }}</td>
+          <td><span class="badge {{ event.status }}">{{ '已上架' if event.status == 'online' else '未上架' }}</span></td>
+          <td class="actions">
+            <a class="text-action" href="{{ url_for('admin.event_edit', event_id=event.id) }}">编辑</a>
+            <form method="post" action="{{ url_for('admin.event_toggle', event_id=event.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="text-action {{ 'danger' if event.status == 'online' }}" type="submit">{{ '下架' if event.status == 'online' else '上架' }}</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}<tr><td colspan="5" class="empty">这个分类下还没有活动</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

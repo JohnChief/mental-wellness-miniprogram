@@ -1,0 +1,97 @@
+{% extends "admin/base.html" %}
+{% block title %}报名管理{% endblock %}
+{% block heading %}报名管理{% endblock %}
+{% block subheading %}查找报名记录并完成现场签到。{% endblock %}
+{% block content %}
+<form class="filter-bar" method="get">
+  <input name="keyword" value="{{ keyword }}" placeholder="搜索姓名或手机号">
+  <select name="event_id"><option value="">全部活动</option>{% for event in event_options %}<option value="{{ event.id }}" {{ 'selected' if event.id == event_id }}>{{ event.title }}</option>{% endfor %}</select>
+  <select name="status"><option value="">全部状态</option><option value="registered" {{ 'selected' if status == 'registered' }}>待签到</option><option value="checked_in" {{ 'selected' if status == 'checked_in' }}>已签到</option><option value="cancelled" {{ 'selected' if status == 'cancelled' }}>已取消</option></select>
+  <button class="button secondary" type="submit">筛选</button>
+  {% if keyword or event_id or status %}<a class="text-action" href="{{ url_for('admin.registrations') }}">清除</a>{% endif %}
+</form>
+<section class="panel">
+  <div class="panel-heading compact"><p>共找到 {{ registrations|length }} 条记录</p></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>报名人</th><th>活动</th><th>备注</th><th>报名时间</th><th>状态</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+      {% for item in registrations %}
+        <tr>
+          <td><strong>{{ item.name }}</strong><small>{{ item.phone }}</small></td>
+          <td>{{ item.event.title }}<small>{{ item.event.event_time.strftime('%m-%d %H:%M') }}</small></td>
+          <td class="remark">{{ item.remark or '—' }}</td>
+          <td>{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td><span class="badge {{ item.status }}">{{ {'registered':'待签到','checked_in':'已签到','cancelled':'已取消'}[item.status] }}</span></td>
+          <td class="actions">
+            {% if item.status == 'registered' %}
+              <form
+                method="post"
+                action="{{ url_for('admin.registration_checkin', registration_id=item.id) }}"
+                data-confirm-checkin
+                data-person="{{ item.name }}"
+                data-event="{{ item.event.title }}"
+              >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="button tiny" type="submit">确认签到</button>
+              </form>
+            {% elif not admin_test_tools_enabled %}
+              <span class="muted">—</span>
+            {% endif %}
+            {% if admin_test_tools_enabled %}
+              {% if item.status == 'checked_in' or item.status == 'cancelled' %}
+                <form method="post" action="{{ url_for('admin.registration_test_status', registration_id=item.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <input type="hidden" name="status" value="registered">
+                  <button class="text-action" type="submit">测试：恢复报名</button>
+                </form>
+              {% elif item.status == 'registered' %}
+                <form method="post" action="{{ url_for('admin.registration_test_status', registration_id=item.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <input type="hidden" name="status" value="cancelled">
+                  <button class="text-action danger" type="submit">测试：取消报名</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}<tr><td colspan="6" class="empty">没有符合条件的报名记录</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+<dialog class="confirm-dialog" data-checkin-dialog>
+  <form method="dialog">
+    <span class="confirm-icon">!</span>
+    <h2>确认完成签到？</h2>
+    <p data-checkin-message></p>
+    <p class="confirm-warning">签到后不可撤销，请确认现场人员信息无误。</p>
+    <div class="confirm-actions">
+      <button class="button secondary" value="cancel">取消</button>
+      <button class="button primary" value="confirm">确认签到</button>
+    </div>
+  </form>
+</dialog>
+<script>
+  const checkinDialog = document.querySelector('[data-checkin-dialog]')
+  let pendingCheckinForm = null
+  document.querySelectorAll('[data-confirm-checkin]').forEach(form => {
+    form.addEventListener('submit', event => {
+      event.preventDefault()
+      pendingCheckinForm = form
+      const person = form.dataset.person
+      const eventName = form.dataset.event
+      checkinDialog.querySelector('[data-checkin-message]').textContent = `${person} · ${eventName}`
+      checkinDialog.showModal()
+    })
+  })
+  if (checkinDialog) {
+    checkinDialog.addEventListener('close', () => {
+      if (checkinDialog.returnValue === 'confirm' && pendingCheckinForm) {
+        pendingCheckinForm.submit()
+      }
+      pendingCheckinForm = null
+    })
+  }
+</script>
+{% endblock %}

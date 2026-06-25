@@ -22,7 +22,7 @@ Page({
     showRegisterButton: false,
     showSaveButton: false,
     formTitle: '快速登录',
-    formTip: '昵称和头像均为选填，未填写时系统会随机分配，登录后可随时修改。',
+    formTip: '昵称和头像均为选填，手机号将在活动报名时填写。',
     user: null,
     avatarUrl: '',
     avatarChanged: false,
@@ -77,7 +77,7 @@ Page({
       showRegisterButton: true,
       showSaveButton: false,
       formTitle: '快速登录',
-      formTip: '昵称和头像均为选填，未填写时系统会随机分配，登录后可随时修改。',
+      formTip: '昵称和头像均为选填，手机号将在活动报名时填写。',
       avatarUrl: '',
       avatarChanged: false,
       originalNickname: '',
@@ -144,19 +144,10 @@ Page({
     wx.navigateTo({ url: '/pages/agreement/agreement?type=privacy' })
   },
 
-  authorizePhone(e) {
+  login() {
     if (this.data.submitting) return
     if (!this.data.agreed) {
       return wx.showToast({ title: '请先同意隐私政策', icon: 'none' })
-    }
-
-    const phoneCode = e.detail.code || ''
-    const errMsg = e.detail.errMsg || ''
-    if (!phoneCode && errMsg.indexOf(':ok') === -1) {
-      const config = require('../../config')
-      if (!config.useMock) {
-        return wx.showToast({ title: '需要授权手机号才能登录', icon: 'none' })
-      }
     }
 
     this.setData({ submitting: true })
@@ -164,7 +155,6 @@ Page({
       .then(avatarFileId => api.registerUser({
         nickname: this.data.nickname.trim(),
         avatar_url: avatarFileId,
-        phone_code: phoneCode || 'mock-phone-code',
         privacy_version: '2026-06-24'
       }))
       .then(user => {

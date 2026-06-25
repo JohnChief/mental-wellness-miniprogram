@@ -31,7 +31,6 @@ class Config:
     }
 
     SECRET_KEY = os.getenv("SECRET_KEY", "")
-    ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
     ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
     ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "")

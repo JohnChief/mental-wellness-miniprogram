@@ -19,7 +19,6 @@
 MYSQL_DATABASE=flask_demo
 # 本地开发也可使用 DATABASE_URL=sqlite:///local.db
 SECRET_KEY=<长随机字符串>
-ADMIN_API_KEY=<另一条长随机字符串>
 ADMIN_USERNAME=<管理后台账号>
 ADMIN_PASSWORD_HASH=<Werkzeug 生成的密码哈希>
 WECHAT_APP_ID=<小程序 AppID>
@@ -64,7 +63,6 @@ GET /health
 - MVP 首次登录使用云托管注入的微信 OpenID；昵称和头像可选，手机号在活动报名时由用户填写。
 - 后端保留手机号授权 code 的兼容处理，待账号具备该能力后可恢复快捷授权。
 - `WECHAT_APP_SECRET` 只能配置在云托管环境变量中，禁止写入代码或提交到 Git。
-- 管理接口要求 `X-ADMIN-KEY`，目前仅用于开发期联调。
 - Admin 页面已使用服务端 Session、CSRF、安全 Cookie 配置与关键操作审计。
 - 正式运营前应改用 `ADMIN_PASSWORD_HASH`，增加登录限速，并关闭 `ADMIN_TEST_TOOLS_ENABLED`。
 - 当前为单管理员环境变量方案；多管理员、角色权限与操作者审计留待后续。

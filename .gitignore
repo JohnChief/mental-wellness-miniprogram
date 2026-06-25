@@ -1,5 +1,6 @@
 feishu_bot/.env
 project.private.config.json
+docs/
 __pycache__/
 *.pyc
 backend/.env

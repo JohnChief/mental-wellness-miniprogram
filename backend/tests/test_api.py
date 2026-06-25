@@ -14,7 +14,6 @@ class ApiTestCase(unittest.TestCase):
                 "AUTO_INIT_DB": True,
                 "SEED_SAMPLE_DATA": True,
                 "ALLOW_DEV_OPENID": True,
-                "ADMIN_API_KEY": "test-admin-key",
             }
         )
         self.client = self.app.test_client()
@@ -122,6 +121,10 @@ class ApiTestCase(unittest.TestCase):
     def test_user_route_rejects_untrusted_identity(self):
         response = self.client.get("/api/registrations/mine")
         self.assertEqual(response.status_code, 401)
+
+    def test_legacy_admin_api_is_not_exposed(self):
+        self.assertEqual(self.client.get("/admin/api/events").status_code, 404)
+        self.assertEqual(self.client.get("/admin/api/users").status_code, 404)
 
     def test_account_deletion_anonymizes_registration(self):
         self.register_user()

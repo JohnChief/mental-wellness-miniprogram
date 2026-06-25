@@ -1,4 +1,3 @@
-import hmac
 import json
 import random
 import re
@@ -9,7 +8,7 @@ from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy.exc import IntegrityError
 
 from .extensions import db
-from .models import AdminAudit, Event, Registration, Setting, User
+from .models import Event, Registration, Setting, User
 from .serializers import event_to_dict, registration_to_dict
 from .wechat import WeChatApiError, resolve_phone_number
 
@@ -71,29 +70,6 @@ def require_user(view):
         return view(user, *args, **kwargs)
 
     return wrapped
-
-
-def require_admin(view):
-    @wraps(view)
-    def wrapped(*args, **kwargs):
-        expected = current_app.config["ADMIN_API_KEY"]
-        provided = request.headers.get("X-ADMIN-KEY", "")
-        if not expected or not hmac.compare_digest(expected, provided):
-            return error("管理员鉴权失败", 401)
-        return view(*args, **kwargs)
-
-    return wrapped
-
-
-def audit(action, target_type, target_id, detail=""):
-    db.session.add(
-        AdminAudit(
-            action=action,
-            target_type=target_type,
-            target_id=str(target_id),
-            detail=detail,
-        )
-    )
 
 
 @api.get("/")
@@ -348,155 +324,3 @@ def delete_account(user):
     user.deleted_at = datetime.now()
     db.session.commit()
     return ok({"deleted": True})
-
-
-@api.get("/admin/api/events")
-@require_admin
-def admin_events():
-    events = Event.query.order_by(Event.event_time.desc()).all()
-    return ok([event_to_dict(item, True) | {"status": item.status} for item in events])
-
-
-@api.post("/admin/api/events")
-@require_admin
-def admin_create_event():
-    payload = request.get_json(silent=True) or {}
-    required = [
-        "title",
-        "event_time",
-        "event_time_text",
-        "location",
-        "description",
-        "target_audience",
-        "flow",
-        "notice",
-    ]
-    if any(not payload.get(field) for field in required):
-        return error("活动信息不完整")
-    event = Event(
-        title=payload["title"],
-        subtitle=payload.get("subtitle", ""),
-        cover_image=payload.get("cover_image", ""),
-        cover_color=payload.get("cover_color", "#d8d1ff"),
-        event_time=datetime.fromisoformat(payload["event_time"]),
-        event_time_text=payload["event_time_text"],
-        location=payload["location"],
-        price_text=payload.get("price_text", "免费"),
-        description=payload["description"],
-        target_audience=payload["target_audience"],
-        flow=payload["flow"],
-        notice=payload["notice"],
-        category=payload.get("category", "本周"),
-        capacity=payload.get("capacity"),
-        status=payload.get("status", "offline"),
-        is_featured=bool(payload.get("is_featured", False)),
-    )
-    db.session.add(event)
-    db.session.flush()
-    audit("create_event", "event", event.id, event.title)
-    db.session.commit()
-    return ok(event_to_dict(event, True), 201)
-
-
-@api.put("/admin/api/events/<int:event_id>")
-@require_admin
-def admin_update_event(event_id):
-    event = Event.query.get(event_id)
-    if not event:
-        return error("活动不存在", 404)
-    payload = request.get_json(silent=True) or {}
-    editable = {
-        "title",
-        "subtitle",
-        "cover_image",
-        "cover_color",
-        "event_time_text",
-        "location",
-        "price_text",
-        "description",
-        "target_audience",
-        "flow",
-        "notice",
-        "category",
-        "capacity",
-        "status",
-        "is_featured",
-    }
-    for field in editable:
-        if field in payload:
-            setattr(event, field, payload[field])
-    if "event_time" in payload:
-        event.event_time = datetime.fromisoformat(payload["event_time"])
-    if "registration_deadline" in payload:
-        value = payload["registration_deadline"]
-        event.registration_deadline = datetime.fromisoformat(value) if value else None
-    audit("update_event", "event", event.id, event.title)
-    db.session.commit()
-    return ok(event_to_dict(event, True) | {"status": event.status})
-
-
-@api.put("/admin/api/events/<int:event_id>/toggle")
-@require_admin
-def admin_toggle_event(event_id):
-    event = Event.query.get(event_id)
-    if not event:
-        return error("活动不存在", 404)
-    event.status = "offline" if event.status == "online" else "online"
-    audit("toggle_event", "event", event.id, event.status)
-    db.session.commit()
-    return ok({"id": event.id, "status": event.status})
-
-
-@api.get("/admin/api/registrations")
-@require_admin
-def admin_registrations():
-    query = Registration.query
-    if request.args.get("event_id"):
-        query = query.filter_by(event_id=request.args["event_id"])
-    records = query.order_by(Registration.created_at.desc()).all()
-    return ok([registration_to_dict(item) for item in records])
-
-
-@api.post("/admin/api/registrations/<int:registration_id>/checkin")
-@require_admin
-def admin_checkin(registration_id):
-    registration = Registration.query.get(registration_id)
-    if not registration:
-        return error("报名记录不存在", 404)
-    if registration.status != "registered":
-        return error("当前状态不能签到", 409)
-    registration.status = "checked_in"
-    registration.checked_in_at = datetime.now()
-    audit("checkin", "registration", registration.id)
-    db.session.commit()
-    return ok(registration_to_dict(registration))
-
-
-@api.get("/admin/api/users")
-@require_admin
-def admin_users():
-    users = User.query.filter_by(deleted_at=None).order_by(User.created_at.desc()).all()
-    return ok(
-        [
-            {
-                "id": user.id,
-                "nickname": user.nickname,
-                "phone": user.phone,
-                "is_vip": user.is_vip,
-                "created_at": user.created_at.isoformat(),
-            }
-            for user in users
-        ]
-    )
-
-
-@api.put("/admin/api/users/<int:user_id>/vip")
-@require_admin
-def admin_toggle_vip(user_id):
-    user = User.query.filter_by(id=user_id, deleted_at=None).first()
-    if not user:
-        return error("用户不存在", 404)
-    user.is_vip = not user.is_vip
-    audit("toggle_vip", "user", user.id, str(user.is_vip))
-    db.session.commit()
-    return ok({"id": user.id, "is_vip": user.is_vip})

@@ -189,6 +189,13 @@ class AdminTestCase(unittest.TestCase):
                 AdminAudit.query.filter_by(action="bulk_set_vip").count(), 2
             )
 
+    def test_registration_page_marks_checkin_as_confirmed_action(self):
+        self.login()
+        response = self.client.get("/admin/registrations")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"data-checkin-dialog", response.data)
+        self.assertIn("签到后不可撤销".encode(), response.data)
+
 
 if __name__ == "__main__":
     unittest.main()

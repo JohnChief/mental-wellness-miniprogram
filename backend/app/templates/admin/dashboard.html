@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% block title %}数据概览{% endblock %}
+{% block heading %}早上好，{{ current_admin }}{% endblock %}
+{% block subheading %}这里是当前的运营概况。{% endblock %}
+{% block header_actions %}<a class="button primary" href="{{ url_for('admin.event_create') }}">＋ 新建活动</a>{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <article class="stat-card violet"><span>活动</span><strong>{{ event_count }}</strong><small>{{ online_count }} 个正在展示</small></article>
+  <article class="stat-card peach"><span>报名</span><strong>{{ registration_count }}</strong><small>{{ pending_count }} 人等待签到</small></article>
+  <article class="stat-card mint"><span>用户</span><strong>{{ user_count }}</strong><small>{{ vip_count }} 位 VIP 用户</small></article>
+</div>
+<div class="dashboard-grid">
+  <section class="panel">
+    <div class="panel-heading"><div><h2>近期报名</h2><p>最新提交的活动报名</p></div><a href="{{ url_for('admin.registrations') }}">查看全部 →</a></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>报名人</th><th>活动</th><th>状态</th><th>时间</th></tr></thead>
+        <tbody>
+        {% for item in recent_registrations %}
+          <tr><td><strong>{{ item.name }}</strong><small>{{ item.phone }}</small></td><td>{{ item.event.title }}</td><td><span class="badge {{ item.status }}">{{ {'registered':'待签到','checked_in':'已签到','cancelled':'已取消'}[item.status] }}</span></td><td>{{ item.created_at.strftime('%m-%d %H:%M') }}</td></tr>
+        {% else %}<tr><td colspan="4" class="empty">还没有报名记录</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-heading"><div><h2>即将开始</h2><p>按活动时间排序</p></div></div>
+    <div class="event-stack">
+      {% for event in upcoming_events %}
+      <a href="{{ url_for('admin.event_edit', event_id=event.id) }}">
+        <span class="date-block"><strong>{{ event.event_time.strftime('%d') }}</strong><small>{{ event.event_time.strftime('%m月') }}</small></span>
+        <span><strong>{{ event.title }}</strong><small>{{ event.event_time.strftime('%H:%M') }} · {{ event.location }}</small></span>
+        <span class="badge {{ event.status }}">{{ '已上架' if event.status == 'online' else '未上架' }}</span>
+      </a>
+      {% else %}<p class="empty">暂无即将开始的活动</p>{% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

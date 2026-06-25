@@ -3,6 +3,7 @@ project.private.config.json
 __pycache__/
 *.pyc
 backend/.env
+backend/instance/*.db
+!backend/instance/.gitkeep
 .pytest_cache/
-backend/.env
-.pytest_cache/
+backend/.test-deps/

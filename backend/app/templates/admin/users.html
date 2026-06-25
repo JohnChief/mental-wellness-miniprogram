@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block title %}用户管理{% endblock %}
+{% block heading %}用户管理{% endblock %}
+{% block subheading %}查看已注册用户并维护 VIP 身份。{% endblock %}
+{% block content %}
+<form class="filter-bar" method="get">
+  <input name="keyword" value="{{ keyword }}" placeholder="搜索昵称或手机号">
+  <button class="button secondary" type="submit">搜索</button>
+  {% if keyword %}<a class="text-action" href="{{ url_for('admin.users') }}">清除</a>{% endif %}
+</form>
+<section class="panel">
+  <div class="panel-heading compact"><p>共找到 {{ users|length }} 位用户</p></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>用户</th><th>手机号</th><th>身份</th><th>注册时间</th><th class="actions">操作</th></tr></thead>
+      <tbody>
+      {% for user in users %}
+        <tr>
+          <td><div class="user-cell"><span class="avatar">{{ (user.nickname or '用')[0] }}</span><strong>{{ user.nickname }}</strong></div></td>
+          <td>{{ user.phone or '—' }}</td>
+          <td>{% if user.is_vip %}<span class="badge vip">VIP 用户</span>{% else %}<span class="muted">普通用户</span>{% endif %}</td>
+          <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td class="actions"><form method="post" action="{{ url_for('admin.user_toggle_vip', user_id=user.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="text-action" type="submit">{{ '取消 VIP' if user.is_vip else '设为 VIP' }}</button></form></td>
+        </tr>
+      {% else %}<tr><td colspan="5" class="empty">没有符合条件的用户</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

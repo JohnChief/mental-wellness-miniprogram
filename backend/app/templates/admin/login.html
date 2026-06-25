@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>管理员登录 · 心语轻疗愈</title>
+  <link rel="stylesheet" href="{{ url_for('admin.static', filename='admin.css') }}">
+</head>
+<body class="login-page">
+  <main class="login-card">
+    <div class="login-intro">
+      <span class="brand-mark large">心</span>
+      <p class="eyebrow">XINYU WELLNESS</p>
+      <h1>让每一次活动，<br>都被温柔地照看。</h1>
+      <p>管理活动、报名与用户，让运营日常清晰一点，从容一点。</p>
+    </div>
+    <div class="login-form">
+      <div>
+        <p class="eyebrow">ADMIN PORTAL</p>
+        <h2>欢迎回来</h2>
+        <p class="muted">请使用运营管理员账号登录</p>
+      </div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>管理员账号<input name="username" autocomplete="username" required placeholder="请输入账号"></label>
+        <label>密码<input type="password" name="password" autocomplete="current-password" required placeholder="请输入密码"></label>
+        <button class="button primary full" type="submit">登录管理后台</button>
+      </form>
+      <p class="login-note">账号信息由服务端环境变量配置，请勿共享。</p>
+    </div>
+  </main>
+</body>
+</html>

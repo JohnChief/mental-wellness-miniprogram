@@ -16,13 +16,25 @@
 
 ```text
 MYSQL_DATABASE=flask_demo
+# 本地开发也可使用 DATABASE_URL=sqlite:///local.db
 SECRET_KEY=<长随机字符串>
 ADMIN_API_KEY=<另一条长随机字符串>
+ADMIN_USERNAME=<管理后台账号>
+ADMIN_PASSWORD_HASH=<Werkzeug 生成的密码哈希>
 WECHAT_APP_ID=<小程序 AppID>
 WECHAT_APP_SECRET=<小程序 AppSecret>
 AUTO_INIT_DB=true
 SEED_SAMPLE_DATA=true
 ALLOW_DEV_OPENID=false
+SESSION_COOKIE_SECURE=true
+```
+
+部署后访问 `/admin/login` 进入运营管理后台。后台包含数据概览、活动管理、
+报名签到与用户 VIP 管理。开发环境可临时使用 `ADMIN_PASSWORD` 明文密码，
+正式环境应只配置 `ADMIN_PASSWORD_HASH`，可通过以下命令生成：
+
+```bash
+python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('替换为强密码'))"
 ```
 
 首次启动会自动建表并写入三条演示活动。确认业务数据已由管理流程维护后，将 `SEED_SAMPLE_DATA` 改为 `false`。

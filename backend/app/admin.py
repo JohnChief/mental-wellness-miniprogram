@@ -133,6 +133,9 @@ def inject_admin_context():
     return {
         "csrf_token": session["csrf_token"],
         "current_admin": session.get("admin_username"),
+        "admin_test_tools_enabled": current_app.config.get(
+            "ADMIN_TEST_TOOLS_ENABLED", False
+        ),
     }
 
 
@@ -312,6 +315,42 @@ def registration_checkin(registration_id):
     return redirect(request.referrer or url_for("admin.registrations"))
 
 
+def require_test_tools():
+    if not current_app.config.get("ADMIN_TEST_TOOLS_ENABLED", False):
+        abort(404)
+
+
+@admin.post("/registrations/<int:registration_id>/test-status")
+@admin_required
+def registration_test_status(registration_id):
+    require_test_tools()
+    verify_csrf()
+    registration = db.get_or_404(Registration, registration_id)
+    status = request.form.get("status", "")
+    if status not in {"registered", "cancelled"}:
+        abort(400, description="不支持的测试状态")
+
+    registration.status = status
+    if status == "registered":
+        registration.checked_in_at = None
+        registration.cancelled_at = None
+    else:
+        registration.checked_in_at = None
+        registration.cancelled_at = datetime.now()
+    record_audit(
+        "test_reset_registration",
+        "registration",
+        registration.id,
+        status,
+    )
+    db.session.commit()
+    flash(
+        "已恢复为待签到" if status == "registered" else "已取消测试报名",
+        "success",
+    )
+    return redirect(request.referrer or url_for("admin.registrations"))
+
+
 @admin.get("/users")
 @admin_required
 def users():
@@ -385,4 +424,75 @@ def users_bulk_vip():
         record_audit("bulk_set_vip", "user", user.id, "True")
     db.session.commit()
     flash(f"已将 {changed} 位用户设为 VIP", "success")
+    return redirect(request.referrer or url_for("admin.users"))
+
+
+@admin.post("/test-data")
+@admin_required
+def create_test_data():
+    require_test_tools()
+    verify_csrf()
+    events = Event.query.order_by(Event.event_time.asc()).all()
+    if not events:
+        flash("请先创建至少一个活动", "error")
+        return redirect(request.referrer or url_for("admin.users"))
+
+    test_profiles = [
+        ("测试用户·春风", "13800001001", False),
+        ("测试用户·夏雨", "13800001002", True),
+        ("测试用户·秋叶", "13800001003", False),
+        ("测试用户·冬雪", "13800001004", True),
+        ("测试用户·星光", "13800001005", False),
+        ("测试用户·月影", "13800001006", False),
+        ("测试用户·云朵", "13800001007", True),
+        ("测试用户·山岚", "13800001008", False),
+    ]
+    created_users = 0
+    created_registrations = 0
+    for index, (nickname, phone, is_vip) in enumerate(test_profiles, start=1):
+        openid = f"admin-test-user-{index}"
+        user = User.query.filter_by(openid=openid).first()
+        if not user:
+            user = User(
+                openid=openid,
+                nickname=nickname,
+                avatar_url="default:cloud",
+                phone=phone,
+                is_vip=is_vip,
+                privacy_version="test",
+                privacy_consent_at=datetime.now(),
+            )
+            db.session.add(user)
+            db.session.flush()
+            created_users += 1
+
+        if index <= 6:
+            event = events[(index - 1) % len(events)]
+            registration = Registration.query.filter_by(
+                event_id=event.id,
+                user_id=user.id,
+            ).first()
+            if not registration:
+                registration = Registration(
+                    event_id=event.id,
+                    user_id=user.id,
+                    name=nickname,
+                    phone=phone,
+                    remark="Admin 测试数据",
+                    status="registered",
+                )
+                db.session.add(registration)
+                created_registrations += 1
+
+    record_audit(
+        "create_test_data",
+        "system",
+        "admin",
+        f"users={created_users}, registrations={created_registrations}",
+    )
+    db.session.commit()
+    flash(
+        f"已新增 {created_users} 位测试用户、{created_registrations} 条测试报名",
+        "success",
+    )
     return redirect(request.referrer or url_for("admin.users"))

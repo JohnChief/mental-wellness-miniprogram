@@ -1,8 +1,9 @@
 import unittest
+from datetime import datetime
 
 from app import create_app
 from app.extensions import db
-from app.models import AdminAudit, Event, User
+from app.models import AdminAudit, Event, Registration, User
 
 
 class AdminTestCase(unittest.TestCase):
@@ -16,6 +17,7 @@ class AdminTestCase(unittest.TestCase):
                 "SECRET_KEY": "test-secret",
                 "ADMIN_USERNAME": "operator",
                 "ADMIN_PASSWORD": "safe-password",
+                "ADMIN_TEST_TOOLS_ENABLED": True,
             }
         )
         self.client = self.app.test_client()
@@ -195,6 +197,40 @@ class AdminTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"data-checkin-dialog", response.data)
         self.assertIn("签到后不可撤销".encode(), response.data)
+
+    def test_admin_can_create_and_reset_test_data(self):
+        self.login()
+        with self.client.session_transaction() as session:
+            csrf = session["csrf_token"]
+        created = self.client.post(
+            "/admin/test-data",
+            data={"csrf_token": csrf},
+        )
+        self.assertEqual(created.status_code, 302)
+        with self.app.app_context():
+            self.assertEqual(
+                User.query.filter(User.openid.like("admin-test-user-%")).count(),
+                8,
+            )
+            registration = (
+                Registration.query.join(User)
+                .filter(User.openid.like("admin-test-user-%"))
+                .first()
+            )
+            registration_id = registration.id
+            registration.status = "checked_in"
+            registration.checked_in_at = datetime.now()
+            db.session.commit()
+
+        reset = self.client.post(
+            f"/admin/registrations/{registration_id}/test-status",
+            data={"csrf_token": csrf, "status": "registered"},
+        )
+        self.assertEqual(reset.status_code, 302)
+        with self.app.app_context():
+            registration = db.session.get(Registration, registration_id)
+            self.assertEqual(registration.status, "registered")
+            self.assertIsNone(registration.checked_in_at)
 
 
 if __name__ == "__main__":

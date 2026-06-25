@@ -27,6 +27,7 @@ AUTO_INIT_DB=true
 SEED_SAMPLE_DATA=true
 ALLOW_DEV_OPENID=false
 SESSION_COOKIE_SECURE=true
+ADMIN_TEST_TOOLS_ENABLED=false
 ```
 
 部署后访问 `/admin/login` 进入运营管理后台。后台包含数据概览、活动管理、
@@ -36,6 +37,9 @@ SESSION_COOKIE_SECURE=true
 ```bash
 python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('替换为强密码'))"
 ```
+
+测试阶段可将 `ADMIN_TEST_TOOLS_ENABLED` 设为 `true`，Admin 将显示测试数据生成、
+取消报名和恢复报名功能。正式运营前必须改回 `false`。
 
 首次启动会自动建表并写入三条演示活动。确认业务数据已由管理流程维护后，将 `SEED_SAMPLE_DATA` 改为 `false`。
 

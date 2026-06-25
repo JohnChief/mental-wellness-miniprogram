@@ -40,6 +40,7 @@ class Config:
     AUTO_INIT_DB = env_bool("AUTO_INIT_DB", True)
     SEED_SAMPLE_DATA = env_bool("SEED_SAMPLE_DATA", True)
     ALLOW_DEV_OPENID = env_bool("ALLOW_DEV_OPENID", False)
+    ADMIN_TEST_TOOLS_ENABLED = env_bool("ADMIN_TEST_TOOLS_ENABLED", False)
     JSON_AS_ASCII = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"

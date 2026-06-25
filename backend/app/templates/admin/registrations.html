@@ -35,8 +35,23 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 <button class="button tiny" type="submit">确认签到</button>
               </form>
-            {% else %}
+            {% elif not admin_test_tools_enabled %}
               <span class="muted">—</span>
+            {% endif %}
+            {% if admin_test_tools_enabled %}
+              {% if item.status == 'checked_in' or item.status == 'cancelled' %}
+                <form method="post" action="{{ url_for('admin.registration_test_status', registration_id=item.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <input type="hidden" name="status" value="registered">
+                  <button class="text-action" type="submit">测试：恢复报名</button>
+                </form>
+              {% elif item.status == 'registered' %}
+                <form method="post" action="{{ url_for('admin.registration_test_status', registration_id=item.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <input type="hidden" name="status" value="cancelled">
+                  <button class="text-action danger" type="submit">测试：取消报名</button>
+                </form>
+              {% endif %}
             {% endif %}
           </td>
         </tr>

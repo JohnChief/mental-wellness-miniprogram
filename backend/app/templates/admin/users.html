@@ -2,6 +2,14 @@
 {% block title %}用户管理{% endblock %}
 {% block heading %}用户管理{% endblock %}
 {% block subheading %}查看已注册用户并维护 VIP 身份。{% endblock %}
+{% block header_actions %}
+  {% if admin_test_tools_enabled %}
+    <form method="post" action="{{ url_for('admin.create_test_data') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="button secondary" type="submit">生成测试数据</button>
+    </form>
+  {% endif %}
+{% endblock %}
 {% block content %}
 <form class="filter-bar" method="get">
   <input name="keyword" value="{{ keyword }}" placeholder="搜索昵称或手机号">

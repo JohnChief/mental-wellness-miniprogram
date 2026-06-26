@@ -1,5 +1,8 @@
 import hmac
+import os
 import secrets
+import time
+import uuid
 from datetime import datetime
 from functools import wraps
 
@@ -11,11 +14,13 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_from_directory,
     session,
     url_for,
 )
 from sqlalchemy import or_
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 
 from .extensions import db
 from .models import AdminAudit, Event, Registration, User
@@ -28,6 +33,11 @@ admin = Blueprint(
     static_folder="static",
     static_url_path="/static",
 )
+
+ALLOWED_EVENT_IMAGE_EXTENSIONS = {"gif", "jpeg", "jpg", "png", "webp"}
+LOGIN_FAILURES = {}
+LOGIN_FAILURE_LIMIT = 5
+LOGIN_LOCK_SECONDS = 15 * 60
 
 
 def admin_required(view):
@@ -66,10 +76,73 @@ def password_matches(password):
     return bool(expected) and hmac.compare_digest(expected, password)
 
 
+def login_rate_key():
+    return request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+
+
+def login_is_rate_limited():
+    entry = LOGIN_FAILURES.get(login_rate_key())
+    return bool(entry and entry.get("locked_until", 0) > time.time())
+
+
+def record_login_failure():
+    key = login_rate_key()
+    now = time.time()
+    entry = LOGIN_FAILURES.get(key, {"count": 0, "locked_until": 0})
+    if entry.get("locked_until", 0) <= now:
+        entry["locked_until"] = 0
+    entry["count"] = entry.get("count", 0) + 1
+    if entry["count"] >= LOGIN_FAILURE_LIMIT:
+        entry["locked_until"] = now + LOGIN_LOCK_SECONDS
+    LOGIN_FAILURES[key] = entry
+
+
+def clear_login_failures():
+    LOGIN_FAILURES.pop(login_rate_key(), None)
+
+
 def safe_next_url(value):
     if value and value.startswith("/admin") and not value.startswith("//"):
         return value
     return url_for("admin.dashboard")
+
+
+def event_image_upload_folder():
+    configured = current_app.config.get("EVENT_IMAGE_UPLOAD_FOLDER")
+    if configured:
+        return configured
+    return os.path.join(current_app.root_path, "static", "uploads", "events")
+
+
+def save_event_image(file_storage):
+    if not file_storage or not file_storage.filename:
+        return ""
+
+    filename = secure_filename(file_storage.filename)
+    extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if extension not in ALLOWED_EVENT_IMAGE_EXTENSIONS:
+        raise ValueError("Please upload a jpg, png, gif, or webp event image.")
+    header = file_storage.stream.read(16)
+    file_storage.stream.seek(0)
+    is_allowed_image = (
+        header.startswith(b"\xff\xd8\xff")
+        or header.startswith(b"\x89PNG\r\n\x1a\n")
+        or header.startswith((b"GIF87a", b"GIF89a"))
+        or (header.startswith(b"RIFF") and header[8:12] == b"WEBP")
+    )
+    if not is_allowed_image:
+        raise ValueError("Uploaded event image content is not a supported image.")
+
+    upload_folder = event_image_upload_folder()
+    os.makedirs(upload_folder, exist_ok=True)
+    stored_name = f"{uuid.uuid4().hex}.{extension}"
+    file_storage.save(os.path.join(upload_folder, stored_name))
+    return url_for("admin.event_image", filename=stored_name)
+
+
+@admin.get("/uploads/events/<path:filename>")
+def event_image(filename):
+    return send_from_directory(event_image_upload_folder(), filename)
 
 
 def parse_datetime(value, field_name, required=False):
@@ -84,10 +157,29 @@ def parse_datetime(value, field_name, required=False):
         raise ValueError(f"{field_name}格式不正确") from exc
 
 
-def populate_event(event, form):
+def format_event_time_text(value):
+    weekdays = ["一", "二", "三", "四", "五", "六", "日"]
+    return f"{value.month}月{value.day}日 周{weekdays[value.weekday()]} {value:%H:%M}"
+
+
+def event_version(event):
+    return event.updated_at.isoformat(timespec="microseconds") if event and event.updated_at else ""
+
+
+def verify_event_version(event, form):
+    submitted_version = (form.get("updated_at") or "").strip()
+    current_version = event_version(event)
+    if not submitted_version or submitted_version != current_version:
+        raise ValueError("该活动已被其他人更新，请刷新后再编辑。")
+
+
+def is_event_version_conflict(error):
+    return "已被其他人更新" in str(error)
+
+
+def populate_event(event, form, files=None):
     required_text = {
         "title": "活动标题",
-        "event_time_text": "展示时间",
         "location": "活动地点",
         "description": "活动介绍",
         "target_audience": "适合人群",
@@ -101,11 +193,18 @@ def populate_event(event, form):
         setattr(event, field, value)
 
     event.subtitle = (form.get("subtitle") or "").strip()
-    event.cover_image = (form.get("cover_image") or "").strip()
+    uploaded_cover_image = save_event_image(files.get("cover_image_file")) if files else ""
+    if uploaded_cover_image:
+        event.cover_image = uploaded_cover_image
+    elif form.get("remove_cover_image") == "on":
+        event.cover_image = ""
+    else:
+        event.cover_image = (form.get("cover_image") or "").strip()
     event.cover_color = (form.get("cover_color") or "#d8d1ff").strip()
     event.price_text = (form.get("price_text") or "免费").strip()
     event.category = (form.get("category") or "本周").strip()
     event.event_time = parse_datetime(form.get("event_time"), "活动时间", True)
+    event.event_time_text = format_event_time_text(event.event_time)
     event.registration_deadline = parse_datetime(
         form.get("registration_deadline"), "报名截止时间"
     )
@@ -136,6 +235,7 @@ def inject_admin_context():
         "admin_test_tools_enabled": current_app.config.get(
             "ADMIN_TEST_TOOLS_ENABLED", False
         ),
+        "event_version": event_version,
     }
 
 
@@ -149,12 +249,17 @@ def login():
 @admin.post("/login")
 def login_submit():
     verify_csrf()
+    if login_is_rate_limited():
+        flash("登录尝试过多，请稍后再试", "error")
+        return render_template("admin/login.html"), 429
+
     username = (request.form.get("username") or "").strip()
     password = request.form.get("password") or ""
     expected_username = current_app.config.get("ADMIN_USERNAME", "admin")
 
     valid_username = hmac.compare_digest(expected_username, username)
     if not valid_username or not password_matches(password):
+        record_login_failure()
         flash("账号或密码不正确", "error")
         return render_template("admin/login.html"), 401
 
@@ -162,6 +267,7 @@ def login_submit():
     session["admin_authenticated"] = True
     session["admin_username"] = username
     session["csrf_token"] = secrets.token_urlsafe(24)
+    clear_login_failures()
     return redirect(safe_next_url(request.args.get("next")))
 
 
@@ -222,7 +328,7 @@ def event_create():
         verify_csrf()
         event = Event()
         try:
-            populate_event(event, request.form)
+            populate_event(event, request.form, request.files)
         except ValueError as exc:
             flash(str(exc), "error")
             return render_template(
@@ -244,12 +350,13 @@ def event_edit(event_id):
     if request.method == "POST":
         verify_csrf()
         try:
-            populate_event(event, request.form)
+            verify_event_version(event, request.form)
+            populate_event(event, request.form, request.files)
         except ValueError as exc:
             flash(str(exc), "error")
             return render_template(
                 "admin/event_form.html", event=event, form=request.form
-            ), 400
+            ), 409 if is_event_version_conflict(exc) else 400
         record_audit("update_event", "event", event.id, event.title)
         db.session.commit()
         flash("活动已保存", "success")

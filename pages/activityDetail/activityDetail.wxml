@@ -3,10 +3,14 @@
   <view wx:if="{{error}}" class="error-state" bindtap="loadEvent">{{error}}，点击重试</view>
 
   <block wx:if="{{showContent}}">
-    <view class="detail-hero">
+    <view class="detail-hero {{event.cover_image ? 'has-cover' : ''}}">
+      <image wx:if="{{event.cover_image}}" class="detail-hero-image" src="{{event.cover_image}}" mode="aspectFill"></image>
+      <view wx:if="{{event.cover_image}}" class="detail-hero-overlay"></view>
+      <view class="detail-hero-content">
       <view class="detail-title">{{event.title}}</view>
       <view class="detail-subtitle">{{event.subtitle}}</view>
       <view class="detail-meta">{{event.event_time_text}} · {{event.location}} · {{event.price_text}}</view>
+      </view>
     </view>
 
     <view class="detail-card card">

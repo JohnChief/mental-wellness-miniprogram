@@ -25,7 +25,8 @@
     data-id="{{item.id}}"
     bindtap="openEvent"
   >
-    <view class="activity-cover" style="background: {{item.cover_color}};"></view>
+    <image wx:if="{{item.cover_image}}" class="activity-cover" src="{{item.cover_image}}" mode="aspectFill"></image>
+    <view wx:else class="activity-cover" style="background: {{item.cover_color}};"></view>
     <view class="activity-info">
       <view class="activity-title">{{item.title}}</view>
       <view class="muted">

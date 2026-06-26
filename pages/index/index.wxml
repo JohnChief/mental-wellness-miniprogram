@@ -13,10 +13,14 @@
       </view>
     </view>
 
-    <view class="hero-card" bindtap="openFeatured">
+    <view class="hero-card {{featuredEvent.cover_image ? 'has-cover' : ''}}" bindtap="openFeatured">
+      <image wx:if="{{featuredEvent.cover_image}}" class="hero-image" src="{{featuredEvent.cover_image}}" mode="aspectFill"></image>
+      <view wx:if="{{featuredEvent.cover_image}}" class="hero-overlay"></view>
+      <view class="hero-content">
       <view class="hero-title">{{featuredEvent.title}}</view>
       <view class="hero-subtitle">{{featuredEvent.subtitle}}</view>
       <view class="hero-action">查看活动详情 →</view>
+      </view>
     </view>
 
     <view class="section-title">核心服务</view>
@@ -33,7 +37,8 @@
 
     <view class="section-title">主推活动</view>
     <view class="event-card card" wx:for="{{events}}" wx:key="id" data-id="{{item.id}}" bindtap="openEvent">
-      <view class="event-cover" style="background: {{item.cover_color}};"></view>
+      <image wx:if="{{item.cover_image}}" class="event-cover" src="{{item.cover_image}}" mode="aspectFill"></image>
+      <view wx:else class="event-cover" style="background: {{item.cover_color}};"></view>
       <view class="event-content">
         <view class="event-title">{{item.title}}</view>
         <view class="muted">{{item.event_time_text}} · {{item.price_text}}</view>

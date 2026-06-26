@@ -47,6 +47,7 @@
   width: 138rpx;
   height: 100rpx;
   flex: none;
+  display: block;
   border-radius: 22rpx;
 }
 

@@ -115,6 +115,7 @@ td.actions { display: flex; align-items: center; justify-content: flex-end; gap:
 .result-count, .muted { color: var(--muted); }
 .event-cell, .user-cell { display: flex; align-items: center; gap: 11px; }
 .cover-dot { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.035); }
+.cover-thumb { flex: 0 0 auto; width: 56px; height: 42px; border-radius: 10px; object-fit: cover; background: var(--lavender); box-shadow: inset 0 0 0 1px rgba(0,0,0,.035); }
 .avatar { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: #6856c2; background: var(--lavender); font-weight: 700; }
 .empty { padding: 35px !important; color: var(--muted); text-align: center; }
 .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
@@ -138,6 +139,9 @@ input:focus, textarea:focus, select:focus { border-color: #9c8de9; box-shadow: 0
 .form-grid .wide { grid-column: 1 / -1; }
 .form-grid .check-label { display: flex; align-items: center; align-self: end; min-height: 40px; }
 .check-label input { width: 16px; min-height: auto; margin: 0 8px 0 0 !important; }
+.cover-preview { display: grid; gap: 9px; align-self: end; }
+.cover-preview img { width: 180px; max-width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--line); border-radius: 10px; object-fit: cover; background: var(--lavender); }
+.cover-preview .check-label { align-self: start; min-height: auto; color: var(--muted); }
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .login-page { min-height: 100vh; display: grid; place-items: center; padding: 30px; background: radial-gradient(circle at 15% 20%, #ede9ff 0, transparent 33%), radial-gradient(circle at 90% 85%, #fbe6dc 0, transparent 32%), #f7f5f8; }
 .login-card { width: min(880px, 100%); min-height: 530px; display: grid; grid-template-columns: 1.05fr 1fr; overflow: hidden; border: 1px solid rgba(255,255,255,.7); border-radius: 24px; background: #fff; box-shadow: 0 24px 80px rgba(66,51,96,.13); }

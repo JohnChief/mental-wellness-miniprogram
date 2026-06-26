@@ -49,6 +49,9 @@ Page({
   },
 
   openRegistration() {
-    wx.switchTab({ url: '/pages/activity/activity' })
+    wx.showToast({
+      title: '咨询入口即将开放',
+      icon: 'none'
+    })
   }
 })

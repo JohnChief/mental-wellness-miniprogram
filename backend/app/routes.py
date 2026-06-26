@@ -76,6 +76,8 @@ def require_user(view):
 def require_admin(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
+        if not current_app.config.get("ENABLE_LEGACY_ADMIN_API", False):
+            return error("Not found", 404)
         expected = current_app.config["ADMIN_API_KEY"]
         provided = request.headers.get("X-ADMIN-KEY", "")
         if not expected or not hmac.compare_digest(expected, provided):

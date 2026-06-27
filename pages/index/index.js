@@ -7,6 +7,8 @@ Page({
     showContent: false,
     settings: {},
     featuredEvent: null,
+    hasFeaturedEvent: false,
+    hasEvents: false,
     events: []
   },
 
@@ -22,10 +24,14 @@ Page({
     this.setData({ loading: true, error: '', showContent: false })
     return api.getHome()
       .then(data => {
+        const events = data.events || []
+        const featuredEvent = data.featured_event || null
         this.setData({
           settings: data.settings,
-          featuredEvent: data.featured_event,
-          events: data.events,
+          featuredEvent,
+          hasFeaturedEvent: !!featuredEvent,
+          hasEvents: events.length > 0,
+          events,
           loading: false,
           showContent: true
         })

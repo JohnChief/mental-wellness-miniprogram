@@ -1,4 +1,18 @@
+from urllib.parse import urljoin
+
+from flask import has_request_context, request
+
 from .models import Registration
+
+
+def public_asset_url(value):
+    if not value:
+        return value
+    if value.startswith(("http://", "https://", "cloud://", "wxfile://", "data:")):
+        return value
+    if value.startswith("/") and has_request_context():
+        return urljoin(request.host_url, value.lstrip("/"))
+    return value
 
 
 def remaining_capacity(event):
@@ -14,7 +28,7 @@ def event_to_dict(event, include_detail=False):
         "id": event.id,
         "title": event.title,
         "subtitle": event.subtitle,
-        "cover_image": event.cover_image,
+        "cover_image": public_asset_url(event.cover_image),
         "cover_color": event.cover_color,
         "event_time": event.event_time.isoformat(),
         "event_time_text": event.event_time_text,

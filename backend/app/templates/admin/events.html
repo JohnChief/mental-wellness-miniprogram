@@ -19,7 +19,7 @@
       <tbody>
       {% for event in events %}
         <tr>
-          <td><div class="event-cell"><span class="cover-dot" style="background:{{ event.cover_color }}"></span><span><strong>{{ event.title }}</strong><small>{{ event.category }} · {{ event.price_text }}</small></span></div></td>
+          <td><div class="event-cell">{% if event.cover_image %}<img class="cover-thumb" src="{{ event.cover_image }}" alt="">{% else %}<span class="cover-dot" style="background:{{ event.cover_color }}"></span>{% endif %}<span><strong>{{ event.title }}</strong><small>{{ event.category }} · {{ event.price_text }}</small></span></div></td>
           <td><strong>{{ event.event_time.strftime('%Y-%m-%d %H:%M') }}</strong><small>{{ event.location }}</small></td>
           <td>{{ event.capacity or '不限' }}</td>
           <td><span class="badge {{ event.status }}">{{ '已上架' if event.status == 'online' else '未上架' }}</span></td>

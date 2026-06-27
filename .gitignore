@@ -3,6 +3,9 @@ project.private.config.json
 __pycache__/
 *.pyc
 backend/.env
+backend/local.db
+backend/local-server.*.log
+backend/app/static/uploads/
 backend/instance/*.db
 !backend/instance/.gitkeep
 .pytest_cache/

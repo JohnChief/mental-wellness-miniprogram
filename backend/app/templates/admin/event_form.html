@@ -4,8 +4,9 @@
 {% block subheading %}完善活动信息后，可选择立即上架或先保存为未上架。{% endblock %}
 {% macro value(name, default='') %}{{ form.get(name, event|attr(name) if event else default) }}{% endmacro %}
 {% block content %}
-<form class="event-form" method="post">
+<form class="event-form" method="post" enctype="multipart/form-data">
   <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  {% if event %}<input type="hidden" name="updated_at" value="{{ form.get('updated_at', event_version(event)) }}">{% endif %}
   <section class="panel form-section">
     <div class="section-title"><span>01</span><div><h2>基础信息</h2><p>用户最先看到的活动内容</p></div></div>
     <div class="form-grid">
@@ -14,7 +15,6 @@
       <label>活动分类<input name="category" value="{{ value('category', '本周') }}" placeholder="本周 / 免费 / 线上"></label>
       <label>价格文案<input name="price_text" value="{{ value('price_text', '免费') }}" placeholder="免费 / ¥99"></label>
       <label>活动时间<input type="datetime-local" name="event_time" required value="{{ form.get('event_time', event.event_time.strftime('%Y-%m-%dT%H:%M') if event else '') }}"></label>
-      <label>展示时间<input name="event_time_text" required value="{{ value('event_time_text') }}" placeholder="周六 14:00"></label>
       <label class="wide">活动地点<input name="location" required value="{{ value('location') }}" placeholder="线下体验空间 / 线上直播"></label>
       <label>活动名额<input type="number" min="1" name="capacity" value="{{ form.get('capacity', event.capacity if event and event.capacity else '') }}" placeholder="留空表示不限"></label>
       <label>报名截止<input type="datetime-local" name="registration_deadline" value="{{ form.get('registration_deadline', event.registration_deadline.strftime('%Y-%m-%dT%H:%M') if event and event.registration_deadline else '') }}"></label>
@@ -33,7 +33,14 @@
     <div class="section-title"><span>03</span><div><h2>展示设置</h2><p>封面与发布状态</p></div></div>
     <div class="form-grid">
       <label>封面主题色<input type="color" name="cover_color" value="{{ value('cover_color', '#d8d1ff') }}"></label>
-      <label>封面图片地址<input name="cover_image" value="{{ value('cover_image') }}" placeholder="可选，云存储图片地址"></label>
+      <label class="wide">封面图片地址<input name="cover_image" value="{{ value('cover_image') }}" placeholder="可选，外链或已上传图片地址"></label>
+      <label>上传封面图片<input type="file" name="cover_image_file" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+      {% if value('cover_image') %}
+      <div class="cover-preview">
+        <img src="{{ value('cover_image') }}" alt="活动封面预览">
+        <label class="check-label"><input type="checkbox" name="remove_cover_image"> 移除当前封面</label>
+      </div>
+      {% endif %}
       <label>发布状态<select name="status"><option value="offline" {{ 'selected' if form.get('status', event.status if event else 'offline') == 'offline' }}>未上架</option><option value="online" {{ 'selected' if form.get('status', event.status if event else '') == 'online' }}>立即上架</option></select></label>
       <label class="check-label"><input type="checkbox" name="is_featured" {{ 'checked' if form.get('is_featured') == 'on' or (not form and event and event.is_featured) }}> 设为首页主推活动</label>
     </div>

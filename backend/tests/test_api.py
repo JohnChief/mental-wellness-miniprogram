@@ -123,6 +123,22 @@ class ApiTestCase(unittest.TestCase):
         response = self.client.get("/api/registrations/mine")
         self.assertEqual(response.status_code, 401)
 
+    def test_security_headers_are_applied(self):
+        response = self.client.get("/health")
+        self.assertEqual(response.headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(response.headers["X-Frame-Options"], "DENY")
+        self.assertEqual(
+            response.headers["Referrer-Policy"],
+            "strict-origin-when-cross-origin",
+        )
+
+    def test_legacy_admin_api_is_disabled_by_default(self):
+        response = self.client.get(
+            "/admin/api/events",
+            headers={"X-ADMIN-KEY": "test-admin-key"},
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_account_deletion_anonymizes_registration(self):
         self.register_user()
         event_id = self.client.get("/api/events").json["data"][0]["id"]

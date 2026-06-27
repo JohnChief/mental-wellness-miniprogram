@@ -1,6 +1,14 @@
 const config = require('../config')
 const mock = require('./mock')
 
+function parseResponse(response, fallbackMessage) {
+  const body = response.data || {}
+  if (response.statusCode >= 400 || body.code) {
+    throw new Error(body.message || fallbackMessage)
+  }
+  return body.data
+}
+
 function callContainer(path, method = 'GET', data = {}) {
   return wx.cloud.callContainer({
     config: {
@@ -13,29 +21,54 @@ function callContainer(path, method = 'GET', data = {}) {
       'X-WX-SERVICE': config.serviceName,
       'content-type': 'application/json'
     }
-  }).then(response => {
-    const body = response.data || {}
-    if (response.statusCode >= 400 || body.code) {
-      throw new Error(body.message || '服务暂时不可用')
-    }
-    return body.data
+  }).then(response => parseResponse(response, '服务暂时不可用'))
+}
+
+function callLocalApi(path, method = 'GET', data = {}) {
+  const baseUrl = (config.localBaseUrl || '').replace(/\/$/, '')
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `${baseUrl}${path}`,
+      method,
+      data,
+      header: {
+        'content-type': 'application/json',
+        'X-DEV-OPENID': config.devOpenid || 'local-dev-user'
+      },
+      success(response) {
+        try {
+          resolve(parseResponse(response, '本地服务暂时不可用'))
+        } catch (error) {
+          reject(error)
+        }
+      },
+      fail(error) {
+        reject(new Error(error.errMsg || '本地服务暂时不可用'))
+      }
+    })
   })
 }
 
+function callApi(path, method = 'GET', data = {}) {
+  return config.useLocalApi
+    ? callLocalApi(path, method, data)
+    : callContainer(path, method, data)
+}
+
 function getHome() {
-  return config.useMock ? Promise.resolve(mock.getHome()) : callContainer('/api/home')
+  return config.useMock ? Promise.resolve(mock.getHome()) : callApi('/api/home')
 }
 
 function getEvents(filter = '全部') {
   return config.useMock
     ? Promise.resolve(mock.getEvents(filter))
-    : callContainer(`/api/events?filter=${encodeURIComponent(filter)}`)
+    : callApi(`/api/events?filter=${encodeURIComponent(filter)}`)
 }
 
 function getEvent(id) {
   return config.useMock
     ? Promise.resolve(mock.getEvent(id))
-    : callContainer(`/api/events/${id}`)
+    : callApi(`/api/events/${id}`)
 }
 
 function getCurrentUser() {
@@ -43,12 +76,12 @@ function getCurrentUser() {
     const user = wx.getStorageSync('mockUser')
     return Promise.resolve(user || { registered: false })
   }
-  return callContainer('/api/auth/me')
+  return callApi('/api/auth/me')
 }
 
 function uploadAvatar(filePath) {
   if (!filePath) return Promise.resolve('')
-  if (config.useMock) return Promise.resolve(filePath)
+  if (config.useMock || config.useLocalApi) return Promise.resolve(filePath)
 
   const extension = (filePath.split('.').pop() || 'jpg').toLowerCase()
   const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`
@@ -76,7 +109,7 @@ function registerUser(payload) {
     wx.setStorageSync('mockUser', user)
     return Promise.resolve(user)
   }
-  return callContainer('/api/auth/register', 'POST', payload)
+  return callApi('/api/auth/register', 'POST', payload)
 }
 
 function updateUserProfile(payload) {
@@ -90,7 +123,7 @@ function updateUserProfile(payload) {
     wx.setStorageSync('mockUser', updated)
     return Promise.resolve(updated)
   }
-  return callContainer('/api/auth/profile', 'PUT', payload)
+  return callApi('/api/auth/profile', 'PUT', payload)
 }
 
 function createRegistration(payload) {
@@ -106,13 +139,13 @@ function createRegistration(payload) {
     wx.setStorageSync('mockRegistrations', records)
     return Promise.resolve(records[0])
   }
-  return callContainer('/api/registrations', 'POST', payload)
+  return callApi('/api/registrations', 'POST', payload)
 }
 
 function getMyRegistrations() {
   return config.useMock
     ? Promise.resolve(wx.getStorageSync('mockRegistrations') || [])
-    : callContainer('/api/registrations/mine')
+    : callApi('/api/registrations/mine')
 }
 
 function cancelRegistration(id) {
@@ -124,7 +157,7 @@ function cancelRegistration(id) {
     wx.setStorageSync('mockRegistrations', records)
     return Promise.resolve()
   }
-  return callContainer(`/api/registrations/${id}/cancel`, 'PUT')
+  return callApi(`/api/registrations/${id}/cancel`, 'PUT')
 }
 
 function deleteAccount() {
@@ -133,7 +166,7 @@ function deleteAccount() {
     wx.removeStorageSync('mockUser')
     return Promise.resolve({ deleted: true })
   }
-  return callContainer('/api/account', 'DELETE')
+  return callApi('/api/account', 'DELETE')
 }
 
 module.exports = {

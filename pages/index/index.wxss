@@ -25,6 +25,8 @@
 }
 
 .hero-card {
+  position: relative;
+  overflow: hidden;
   min-height: 270rpx;
   margin-top: 28rpx;
   padding: 54rpx 30rpx 30rpx;
@@ -32,6 +34,50 @@
   background: linear-gradient(135deg, #eee9ff, #e8e1ff);
   border: 1rpx solid #d9d0ff;
   border-radius: 32rpx;
+}
+
+.hero-image,
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-image {
+  display: block;
+}
+
+.hero-overlay {
+  background: linear-gradient(90deg, rgba(32, 28, 46, 0.72), rgba(32, 28, 46, 0.18));
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-card.has-cover .hero-content {
+  color: #ffffff;
+}
+
+.hero-card.has-cover .hero-subtitle {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.empty-hero {
+  background: linear-gradient(135deg, #fff8ef, #eaf6f0);
+  border-color: #eadfce;
+}
+
+.hero-kicker {
+  margin-bottom: 14rpx;
+  color: #7a6a3b;
+  font-size: 23rpx;
+  font-weight: 700;
 }
 
 .hero-title {
@@ -87,6 +133,7 @@
   width: 138rpx;
   height: 106rpx;
   flex: none;
+  display: block;
   border-radius: 22rpx;
 }
 
@@ -98,6 +145,23 @@
 .event-title {
   margin-bottom: 10rpx;
   font-size: 28rpx;
+  font-weight: 700;
+}
+
+.event-empty {
+  padding: 34rpx 30rpx;
+}
+
+.event-empty-title {
+  margin-bottom: 10rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.event-empty-action {
+  margin-top: 22rpx;
+  color: #6d5df6;
+  font-size: 24rpx;
   font-weight: 700;
 }
 

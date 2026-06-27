@@ -32,6 +32,7 @@ class Config:
 
     SECRET_KEY = os.getenv("SECRET_KEY", "")
     ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
+    ENABLE_LEGACY_ADMIN_API = env_bool("ENABLE_LEGACY_ADMIN_API", False)
     ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
     ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "")
@@ -41,6 +42,8 @@ class Config:
     SEED_SAMPLE_DATA = env_bool("SEED_SAMPLE_DATA", True)
     ALLOW_DEV_OPENID = env_bool("ALLOW_DEV_OPENID", False)
     ADMIN_TEST_TOOLS_ENABLED = env_bool("ADMIN_TEST_TOOLS_ENABLED", False)
+    EVENT_IMAGE_UPLOAD_FOLDER = os.getenv("EVENT_IMAGE_UPLOAD_FOLDER", "")
+    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(8 * 1024 * 1024)))
     JSON_AS_ASCII = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"

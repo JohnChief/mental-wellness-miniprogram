@@ -13,6 +13,14 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+        return response
+
     db.init_app(app)
 
     from .routes import api

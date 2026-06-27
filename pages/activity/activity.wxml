@@ -16,7 +16,11 @@
   <view class="section-label">活动列表</view>
   <view wx:if="{{loading}}" class="empty-state">正在加载...</view>
   <view wx:if="{{error}}" class="error-state" bindtap="loadEvents">{{error}}，点击重试</view>
-  <view wx:if="{{showEmpty}}" class="empty-state">暂时没有符合条件的活动</view>
+  <view wx:if="{{showEmpty}}" class="activity-empty card">
+    <view class="activity-empty-title">{{emptyTitle}}</view>
+    <view class="activity-empty-text">{{emptyText}}</view>
+    <button class="activity-empty-button" bindtap="handleEmptyAction">{{emptyAction}}</button>
+  </view>
   <view
     wx:if="{{showList}}"
     class="activity-card card"
@@ -25,7 +29,8 @@
     data-id="{{item.id}}"
     bindtap="openEvent"
   >
-    <view class="activity-cover" style="background: {{item.cover_color}};"></view>
+    <image wx:if="{{item.cover_image}}" class="activity-cover" src="{{item.cover_image}}" mode="aspectFill"></image>
+    <view wx:else class="activity-cover" style="background: {{item.cover_color}};"></view>
     <view class="activity-info">
       <view class="activity-title">{{item.title}}</view>
       <view class="muted">

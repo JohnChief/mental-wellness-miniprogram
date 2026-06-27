@@ -36,6 +36,35 @@
   border-color: #6d5df6;
 }
 
+.activity-empty {
+  padding: 54rpx 34rpx;
+  text-align: center;
+}
+
+.activity-empty-title {
+  font-size: 31rpx;
+  font-weight: 700;
+}
+
+.activity-empty-text {
+  margin-top: 14rpx;
+  color: #89869a;
+  font-size: 25rpx;
+  line-height: 1.6;
+}
+
+.activity-empty-button {
+  width: 232rpx;
+  height: 72rpx;
+  margin: 30rpx auto 0;
+  color: #ffffff;
+  font-size: 25rpx;
+  font-weight: 600;
+  line-height: 72rpx;
+  background: #6d5df6;
+  border-radius: 20rpx;
+}
+
 .activity-card {
   display: flex;
   align-items: center;
@@ -47,6 +76,7 @@
   width: 138rpx;
   height: 100rpx;
   flex: none;
+  display: block;
   border-radius: 22rpx;
 }
 

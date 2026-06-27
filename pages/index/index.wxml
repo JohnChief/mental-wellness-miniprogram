@@ -13,10 +13,22 @@
       </view>
     </view>
 
-    <view class="hero-card" bindtap="openFeatured">
-      <view class="hero-title">{{featuredEvent.title}}</view>
-      <view class="hero-subtitle">{{featuredEvent.subtitle}}</view>
-      <view class="hero-action">查看活动详情 →</view>
+    <view wx:if="{{hasFeaturedEvent}}" class="hero-card {{featuredEvent.cover_image ? 'has-cover' : ''}}" bindtap="openFeatured">
+      <image wx:if="{{featuredEvent.cover_image}}" class="hero-image" src="{{featuredEvent.cover_image}}" mode="aspectFill"></image>
+      <view wx:if="{{featuredEvent.cover_image}}" class="hero-overlay"></view>
+      <view class="hero-content">
+        <view class="hero-title">{{featuredEvent.title}}</view>
+        <view class="hero-subtitle">{{featuredEvent.subtitle}}</view>
+        <view class="hero-action">查看活动详情 →</view>
+      </view>
+    </view>
+    <view wx:else class="hero-card empty-hero" bindtap="loadHome">
+      <view class="hero-content">
+        <view class="hero-kicker">活动筹备中</view>
+        <view class="hero-title">新的疗愈体验很快上线</view>
+        <view class="hero-subtitle">运营老师还没有发布活动，你可以先了解核心服务，稍后下拉刷新查看最新安排。</view>
+        <view class="hero-action">刷新看看 →</view>
+      </view>
     </view>
 
     <view class="section-title">核心服务</view>
@@ -32,12 +44,20 @@
     </view>
 
     <view class="section-title">主推活动</view>
-    <view class="event-card card" wx:for="{{events}}" wx:key="id" data-id="{{item.id}}" bindtap="openEvent">
-      <view class="event-cover" style="background: {{item.cover_color}};"></view>
-      <view class="event-content">
-        <view class="event-title">{{item.title}}</view>
-        <view class="muted">{{item.event_time_text}} · {{item.price_text}}</view>
+    <block wx:if="{{hasEvents}}">
+      <view class="event-card card" wx:for="{{events}}" wx:key="id" data-id="{{item.id}}" bindtap="openEvent">
+        <image wx:if="{{item.cover_image}}" class="event-cover" src="{{item.cover_image}}" mode="aspectFill"></image>
+        <view wx:else class="event-cover" style="background: {{item.cover_color}};"></view>
+        <view class="event-content">
+          <view class="event-title">{{item.title}}</view>
+          <view class="muted">{{item.event_time_text}} · {{item.price_text}}</view>
+        </view>
       </view>
+    </block>
+    <view wx:else class="event-empty card" bindtap="openActivities">
+      <view class="event-empty-title">暂无可报名活动</view>
+      <view class="muted">活动发布后会出现在这里，欢迎稍后回来看看。</view>
+      <view class="event-empty-action">进入活动页</view>
     </view>
 
     <view class="compliance-note">

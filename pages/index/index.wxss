@@ -68,6 +68,18 @@
   color: rgba(255, 255, 255, 0.82);
 }
 
+.empty-hero {
+  background: linear-gradient(135deg, #fff8ef, #eaf6f0);
+  border-color: #eadfce;
+}
+
+.hero-kicker {
+  margin-bottom: 14rpx;
+  color: #7a6a3b;
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
 .hero-title {
   font-size: 38rpx;
   font-weight: 700;
@@ -133,6 +145,23 @@
 .event-title {
   margin-bottom: 10rpx;
   font-size: 28rpx;
+  font-weight: 700;
+}
+
+.event-empty {
+  padding: 34rpx 30rpx;
+}
+
+.event-empty-title {
+  margin-bottom: 10rpx;
+  font-size: 29rpx;
+  font-weight: 700;
+}
+
+.event-empty-action {
+  margin-top: 22rpx;
+  color: #6d5df6;
+  font-size: 24rpx;
   font-weight: 700;
 }
 
